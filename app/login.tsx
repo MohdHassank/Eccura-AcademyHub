@@ -57,10 +57,13 @@ export default function LoginPage() {
     }
 
     // Success State Handler (Ready for API integration layer)
-    Alert.alert("Success", "Authentication handshake successful! Syncing profile...");
     console.log("Verified Auth Payload:", { loginId: trimmedIdentifier, password });
     
-    // Router transition payload can be initialized here (e.g., router.replace('/dashboard'))
+    // ==========================================
+    // 🔥 FIXED: ROUTER REDIRECTION STATE TO MAIN DASHBOARD
+    // ==========================================
+    // router.replace lagaya hai taaki login hone ke baad user back button daba ke login screen par na aa sake
+    router.replace("/(tabs)");
   };
 
   return (
@@ -71,7 +74,7 @@ export default function LoginPage() {
         
         {/* NATIVE BACK NAVIGATION HANDLER */}
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Feather name={"arrow-left" as any} size={20} color="#1E293B" />
+          <Feather name="arrow-left" size={20} color="#1E293B" />
         </TouchableOpacity>
 
         {/* ================= HERO GRAPHIC & LOGO HEADER ================= */}
@@ -87,7 +90,7 @@ export default function LoginPage() {
             </Text>
           </View>
           <Image 
-            source={require("../assets/images/Login-image.png")} // Change to login hero asset if uniquely managed
+            source={require("../assets/images/Login-image.png")} 
             style={styles.topIllustration} 
           />
         </View>
@@ -100,7 +103,7 @@ export default function LoginPage() {
           {/* Identifier Input Box */}
           <Text style={styles.inputLabel}>Email / Phone Number</Text>
           <View style={styles.inputWrapper}>
-            <Feather name={"mail" as any} size={18} color="#94A3B8" style={styles.inputIcon} />
+            <Feather name="mail" size={18} color="#94A3B8" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Enter your email or phone number"
@@ -115,7 +118,7 @@ export default function LoginPage() {
           {/* Password Input Box */}
           <Text style={styles.inputLabel}>Password</Text>
           <View style={styles.inputWrapper}>
-            <Feather name={"lock" as any} size={18} color="#94A3B8" style={styles.inputIcon} />
+            <Feather name="lock" size={18} color="#94A3B8" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Enter your password"
@@ -127,7 +130,7 @@ export default function LoginPage() {
               onChangeText={setPassword}
             />
             <TouchableOpacity onPress={() => setSecurePass(!securePass)}>
-              <Feather name={(securePass ? "eye-off" : "eye") as any} size={18} color="#94A3B8" />
+              <Feather name={securePass ? "eye-off" : "eye"} size={18} color="#94A3B8" />
             </TouchableOpacity>
           </View>
 
@@ -154,17 +157,17 @@ export default function LoginPage() {
           {/* IMMUTABLE BRAND INTEGRITY LOGOS */}
           <View style={styles.socialRow}>
             <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
-              <Ionicons name={"logo-google" as any} size={18} color="#EA4335" />
+              <Ionicons name="logo-google" size={18} color="#EA4335" />
               <Text style={styles.socialButtonText}>Google</Text>
             </TouchableOpacity>
             
             <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
-              <Ionicons name={"logo-apple" as any} size={20} color="#000000" style={{ marginTop: -2 }} />
+              <Ionicons name="logo-apple" size={20} color="#000000" style={{ marginTop: -2 }} />
               <Text style={styles.socialButtonText}>Apple</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
-              <FontAwesome name={"facebook-official" as any} size={18} color="#1877F2" />
+              <FontAwesome name="facebook-official" size={18} color="#1877F2" />
               <Text style={styles.socialButtonText}>Facebook</Text>
             </TouchableOpacity>
           </View>

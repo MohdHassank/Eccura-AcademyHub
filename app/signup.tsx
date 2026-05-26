@@ -11,6 +11,7 @@ import {
     TextInput,
     TouchableOpacity,
     View,
+    Alert,
 } from "react-native";
 // Icons ke liye expo framework ke native icons use karenge
 import {
@@ -42,56 +43,59 @@ export default function SignUpPage() {
   const [selectedRole, setSelectedRole] = useState("student"); // student | teacher | guardian
   const [isAgreed, setIsAgreed] = useState(false);
 
-// ---> IS VALIDATION FUNCTION KO RETURN SE THIK UPAR RAKHEIN <---
+  // Commercial-Grade Registration Validation Engine
   const handleSignUp = () => {
     // 1. Mandatory Fields Check (Koi bhi field khali nahi honi chahiye)
     if (!fullName.trim() || !email.trim() || !phone.trim() || !password || !confirmPassword) {
-      alert("Please fill all the mandatory fields!");
+      Alert.alert("Registration Failed", "Please fill all the mandatory fields!");
       return;
     }
 
     // 2. Proper Email Validation Regex (Sirf genuine email syntax '@' aur '.' allow karega)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
-      alert("Please enter a valid email address (e.g., name@email.com)!");
+      Alert.alert("Invalid Email", "Please enter a valid email address (e.g., name@email.com)!");
       return;
     }
 
     // 3. Phone Number Validation (Standard 10 digits check)
     if (phone.trim().length < 10) {
-      alert("Please enter a valid 10-digit phone number!");
+      Alert.alert("Invalid Phone", "Please enter a valid 10-digit phone number!");
       return;
     }
 
     // 4. Password Strength Check (Minimum 6 characters)
     if (password.length < 6) {
-      alert("Password must be at least 6 characters long!");
+      Alert.alert("Security Restriction", "Password must be at least 6 characters long!");
       return;
     }
 
     // 5. Password Match Check
     if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+      Alert.alert("Security Mismatch", "Passwords do not match!");
       return;
     }
 
     // 6. Terms and Conditions Check
     if (!isAgreed) {
-      alert("You must agree to the Terms of Service and Privacy Policy!");
+      Alert.alert("Policy Agreement Required", "You must agree to the Terms of Service and Privacy Policy!");
       return;
     }
 
-    // Agar sab sahi hai, toh aage ka logic chalega
-    alert("Account Created Successfully!");
-    console.log("Form Data:", { fullName, email, phone, selectedRole });
-    // Yahan aap backend API call ya dashboard par navigation karwa sakte hain
+    // Success State Handler (Ready for API integration layer)
+    console.log("Verified SignUp Payload:", { fullName, email, phone, selectedRole });
+
+    // ==========================================
+    // 🔥 FIXED: ROUTER REDIRECTION STATE TO MAIN DASHBOARD
+    // ==========================================
+    // Account bante hi user seedha main app framework (tabs dashboard) ke andar enter kar jayega
+    router.replace("/(tabs)");
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-      {/* ScrollView zaroori hai taaki keyboard khulne par ya chote screen par design na kete */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
@@ -112,9 +116,7 @@ export default function SignUpPage() {
               style={styles.miniLogo}
             />
             <Text style={styles.mainTitle}>Create Your</Text>
-            <Text style={[styles.mainTitle, { color: "#2563EB" }]}>
-                        Account
-                      </Text>
+            <Text style={[styles.mainTitle, { color: "#2563EB" }]}>Account</Text>
             <Text style={styles.subTitle}>
               Join Academy Hub and start your learning journey today!
             </Text>
@@ -135,12 +137,7 @@ export default function SignUpPage() {
           {/* 1. Full Name */}
           <Text style={styles.inputLabel}>Full Name</Text>
           <View style={styles.inputWrapper}>
-            <Feather
-              name="user"
-              size={18}
-              color="#94A3B8"
-              style={styles.inputIcon}
-            />
+            <Feather name="user" size={18} color="#94A3B8" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Enter your full name"
@@ -153,12 +150,7 @@ export default function SignUpPage() {
           {/* 2. Email Address */}
           <Text style={styles.inputLabel}>Email Address</Text>
           <View style={styles.inputWrapper}>
-            <Feather
-              name="mail"
-              size={18}
-              color="#94A3B8"
-              style={styles.inputIcon}
-            />
+            <Feather name="mail" size={18} color="#94A3B8" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Enter your email address"
@@ -173,12 +165,7 @@ export default function SignUpPage() {
           {/* 3. Phone Number */}
           <Text style={styles.inputLabel}>Phone Number</Text>
           <View style={styles.inputWrapper}>
-            <Feather
-              name="phone"
-              size={18}
-              color="#94A3B8"
-              style={styles.inputIcon}
-            />
+            <Feather name="phone" size={18} color="#94A3B8" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Enter your phone number"
@@ -192,12 +179,7 @@ export default function SignUpPage() {
           {/* 4. Password */}
           <Text style={styles.inputLabel}>Password</Text>
           <View style={styles.inputWrapper}>
-            <Feather
-              name="lock"
-              size={18}
-              color="#94A3B8"
-              style={styles.inputIcon}
-            />
+            <Feather name="lock" size={18} color="#94A3B8" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Create a password"
@@ -207,23 +189,14 @@ export default function SignUpPage() {
               onChangeText={setPassword}
             />
             <TouchableOpacity onPress={() => setSecurePass(!securePass)}>
-              <Feather
-                name={securePass ? "eye-off" : "eye"}
-                size={18}
-                color="#94A3B8"
-              />
+              <Feather name={securePass ? "eye-off" : "eye"} size={18} color="#94A3B8" />
             </TouchableOpacity>
           </View>
 
           {/* 5. Confirm Password */}
           <Text style={styles.inputLabel}>Confirm Password</Text>
           <View style={styles.inputWrapper}>
-            <Feather
-              name="lock"
-              size={18}
-              color="#94A3B8"
-              style={styles.inputIcon}
-            />
+            <Feather name="lock" size={18} color="#94A3B8" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Confirm your password"
@@ -232,14 +205,8 @@ export default function SignUpPage() {
               value={confirmPassword}
               onChangeText={setConfirmPassword}
             />
-            <TouchableOpacity
-              onPress={() => setSecureConfirmPass(!secureConfirmPass)}
-            >
-              <Feather
-                name={secureConfirmPass ? "eye-off" : "eye"}
-                size={18}
-                color="#94A3B8"
-              />
+            <TouchableOpacity onPress={() => setSecureConfirmPass(!secureConfirmPass)}>
+              <Feather name={secureConfirmPass ? "eye-off" : "eye"} size={18} color="#94A3B8" />
             </TouchableOpacity>
           </View>
 
@@ -261,21 +228,12 @@ export default function SignUpPage() {
                   color={selectedRole === "student" ? "#2563EB" : "#94A3B8"}
                 />
                 <MaterialIcons
-                  name={
-                    selectedRole === "student"
-                      ? "radio-button-checked"
-                      : "radio-button-unchecked"
-                  }
+                  name={selectedRole === "student" ? "radio-button-checked" : "radio-button-unchecked"}
                   size={20}
                   color={selectedRole === "student" ? "#2563EB" : "#CBD5E1"}
                 />
               </View>
-              <Text
-                style={[
-                  styles.roleTitle,
-                  selectedRole === "student" && styles.activeRoleText,
-                ]}
-              >
+              <Text style={[styles.roleTitle, selectedRole === "student" && styles.activeRoleText]}>
                 I'm a Student
               </Text>
               <Text style={styles.roleDesc}>
@@ -298,21 +256,12 @@ export default function SignUpPage() {
                   color={selectedRole === "teacher" ? "#10B981" : "#94A3B8"}
                 />
                 <MaterialIcons
-                  name={
-                    selectedRole === "teacher"
-                      ? "radio-button-checked"
-                      : "radio-button-unchecked"
-                  }
+                  name={selectedRole === "teacher" ? "radio-button-checked" : "radio-button-unchecked"}
                   size={20}
                   color={selectedRole === "teacher" ? "#2563EB" : "#CBD5E1"}
                 />
               </View>
-              <Text
-                style={[
-                  styles.roleTitle,
-                  selectedRole === "teacher" && styles.activeRoleText,
-                ]}
-              >
+              <Text style={[styles.roleTitle, selectedRole === "teacher" && styles.activeRoleText]}>
                 I'm a Teacher
               </Text>
               <Text style={styles.roleDesc}>Teach and manage your classes</Text>
@@ -333,21 +282,12 @@ export default function SignUpPage() {
                   color={selectedRole === "guardian" ? "#7C3AED" : "#94A3B8"}
                 />
                 <MaterialIcons
-                  name={
-                    selectedRole === "guardian"
-                      ? "radio-button-checked"
-                      : "radio-button-unchecked"
-                  }
+                  name={selectedRole === "guardian" ? "radio-button-checked" : "radio-button-unchecked"}
                   size={20}
                   color={selectedRole === "guardian" ? "#2563EB" : "#CBD5E1"}
                 />
               </View>
-              <Text
-                style={[
-                  styles.roleTitle,
-                  selectedRole === "guardian" && styles.activeRoleText,
-                ]}
-              >
+              <Text style={[styles.roleTitle, selectedRole === "guardian" && styles.activeRoleText]}>
                 I'm a Guardian
               </Text>
               <Text style={styles.roleDesc}>
@@ -358,31 +298,21 @@ export default function SignUpPage() {
 
           {/* ================= TERMS & CONDITIONS CHECKBOX ================= */}
           <TouchableOpacity style={styles.checkboxRow} activeOpacity={0.8} onPress={() => setIsAgreed(!isAgreed)}>
-  {isAgreed ? (
-    // Jab check ho toh blue color ka filled box dikhega
-    <Feather 
-      name={"check-square" as any} 
-      size={20} 
-      color="#2563EB" 
-    />
-  ) : (
-    // Jab check na ho toh khali border box dikhega
-    <Feather 
-      name={"square" as any} 
-      size={20} 
-      color="#94A3B8" 
-    />
-  )}
-  <Text style={styles.checkboxText}>
-    I agree to the <Text style={styles.linkText}>Terms of Service</Text> and <Text style={styles.linkText}>Privacy Policy</Text>
-  </Text>
-</TouchableOpacity>
+            {isAgreed ? (
+              <Feather name="check-square" size={20} color="#2563EB" />
+            ) : (
+              <Feather name="square" size={20} color="#94A3B8" />
+            )}
+            <Text style={styles.checkboxText}>
+              I agree to the <Text style={styles.linkText}>Terms of Service</Text> and <Text style={styles.linkText}>Privacy Policy</Text>
+            </Text>
+          </TouchableOpacity>
 
           {/* ================= CREATE ACCOUNT BUTTON ================= */}
           <TouchableOpacity 
             style={styles.submitButton} 
             activeOpacity={0.9}
-            onPress={handleSignUp} // <--- Bas ye line add kar do yahan!
+            onPress={handleSignUp}
           >
             <Text style={styles.submitButtonText}>Create Account</Text>
           </TouchableOpacity>
@@ -394,28 +324,25 @@ export default function SignUpPage() {
             <View style={styles.dividerLine} />
           </View>
 
-          {/* SOCIAL BUTTONS */}
-          {/* ================= SOCIAL BUTTONS (FIXED) ================= */}
+          {/* ================= SOCIAL BUTTONS ================= */}
           <View style={styles.socialRow}>
-            
             {/* Google Button */}
-            <TouchableOpacity style={styles.socialButton}>
-              <Ionicons name={"logo-google" as any} size={18} color="#EA4335" />
+            <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
+              <Ionicons name="logo-google" size={18} color="#EA4335" />
               <Text style={styles.socialButtonText}>Google</Text>
             </TouchableOpacity>
             
             {/* Apple Button */}
-            <TouchableOpacity style={styles.socialButton}>
-              <Ionicons name={"logo-apple" as any} size={20} color="#000000" style={{ marginTop: -2 }} />
+            <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
+              <Ionicons name="logo-apple" size={20} color="#000000" style={{ marginTop: -2 }} />
               <Text style={styles.socialButtonText}>Apple</Text>
             </TouchableOpacity>
 
             {/* Facebook Button */}
-            <TouchableOpacity style={styles.socialButton}>
-              <FontAwesome name={"facebook-official" as any} size={18} color="#1877F2" />
+            <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
+              <FontAwesome name="facebook-official" size={18} color="#1877F2" />
               <Text style={styles.socialButtonText}>Facebook</Text>
             </TouchableOpacity>
-            
           </View>
 
           {/* FOOTER LINK */}
