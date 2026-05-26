@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import React from "react";
 import {
   Dimensions,
+  FlatList,
   Image,
   SafeAreaView,
   ScrollView,
@@ -10,7 +11,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 const myLogo = require("../../assets/images/logo.png"); // Agar assets folder root par hai toh path sahi dhyan rakhna
@@ -19,6 +20,45 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function LandingPage() {
   const router = useRouter();
+
+  // 1. Slider ka features data array
+  const slidesData = [
+    {
+      id: "1",
+      title: "Secure & Reliable",
+      desc: "Your data is always safe with us",
+      icon: "🛡️",
+      iconColor: "#137333",
+      bgColor: "#E6F4EA",
+    },
+    {
+      id: "2",
+      title: "Smart & Efficient",
+      desc: "AI-powered tools for better learning",
+      icon: "🚀",
+      iconColor: "#7C3AED",
+      bgColor: "#F3E8FF",
+    },
+    {
+      id: "3",
+      title: "Connected Community",
+      desc: "Students, teachers & parents in one place",
+      icon: "👥",
+      iconColor: "#EA580C",
+      bgColor: "#FFEDD5",
+    },
+  ];
+
+  // 2. State aur Refs slide active track karne ke liye
+  const [activeIndex, setActiveIndex] = React.useState(0);
+
+  const onViewRef = React.useRef(({ viewableItems }: any) => {
+    if (viewableItems && viewableItems.length > 0) {
+      setActiveIndex(viewableItems[0].index);
+    }
+  });
+
+  const viewConfigRef = React.useRef({ viewAreaCoveragePercentThreshold: 50 });
 
   return (
     <SafeAreaView style={styles.container}>
@@ -53,18 +93,63 @@ export default function LandingPage() {
           <Image source={mockupImage} style={styles.mockupImage} />
         </View>
 
+        {/* ================= SECTION 4: DYNAMIC SLIDER ================= */}
+        <View style={styles.sliderWrapper}>
+          <FlatList
+            data={slidesData}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            snapToAlignment="center"
+            onViewableItemsChanged={onViewRef.current}
+            viewabilityConfig={viewConfigRef.current}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View style={styles.slideCard}>
+                <View
+                  style={[styles.iconCircle, { backgroundColor: item.bgColor }]}
+                >
+                  <Text style={{ fontSize: 22, color: item.iconColor }}>
+                    {item.icon}
+                  </Text>
+                </View>
+                <Text style={styles.featureTitle}>{item.title}</Text>
+                <Text style={styles.featureDesc}>{item.desc}</Text>
+              </View>
+            )}
+          />
+
+          {/* DYNAMIC PAGINATION DOTS */}
+          <View style={styles.paginationDotsContainer}>
+            {slidesData.map((_, index) => {
+              const isActive = index === activeIndex;
+              return (
+                <View
+                  key={index}
+                  style={[
+                    styles.dot,
+                    isActive ? styles.activeDot : styles.inactiveDot,
+                  ]}
+                />
+              );
+            })}
+          </View>
+        </View>
+
         {/* ================= SECTION 5: BUTTONS ================= */}
         <TouchableOpacity
           style={styles.primaryButton}
           activeOpacity={0.9}
-          onPress={() => console.log("Get Started Clicked")}
+          onPress={() => router.push("/signup")} // <--- Yeh ab aapko Sign Up page par bhejega
         >
           <Text style={styles.buttonText}>Get Started</Text>
         </TouchableOpacity>
 
         <View style={styles.loginRow}>
           <Text style={styles.alreadyText}>Already have an account? </Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push("/login")}>
+            {" "}
+            {/* <--- Yeh Login page par bhejega */}
             <Text style={styles.loginLink}>Login</Text>
           </TouchableOpacity>
         </View>
@@ -200,5 +285,49 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
     color: "#2563EB",
+  },
+
+  // ---> IN STYLES KO STYLESHEET KE ANDAR SABSE NICHE ADD KAREIN <---
+  sliderWrapper: {
+    width: "100%",
+    alignItems: "center",
+    marginVertical: 15,
+  },
+  slideCard: {
+    width: SCREEN_WIDTH - 48, // Padding minus karke text ko beech me fit karega
+    alignItems: "center",
+    paddingHorizontal: 10,
+  },
+  iconCircle: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  featureTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1E293B",
+    textAlign: "center",
+  },
+  featureDesc: {
+    fontSize: 13,
+    color: "#64748B",
+    textAlign: "center",
+    marginTop: 4,
+    lineHeight: 18,
+  },
+  paginationDotsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 15,
+    marginBottom: 15,
+  },
+  inactiveDot: {
+    width: 8,
+    backgroundColor: "#CBD5E1",
   },
 });

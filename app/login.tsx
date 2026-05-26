@@ -1,0 +1,377 @@
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  SafeAreaView,
+  Image,
+  Dimensions,
+  StatusBar,
+  Alert,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { Feather, FontAwesome, Ionicons } from "@expo/vector-icons";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+export default function LoginPage() {
+  const router = useRouter();
+
+  // Form States
+  const [identifier, setIdentifier] = useState(""); // Email or Phone number
+  const [password, setPassword] = useState("");
+  const [securePass, setSecurePass] = useState(true);
+
+  // Commercial-Grade Authentication Validation
+  const handleLogin = () => {
+    const trimmedIdentifier = identifier.trim();
+
+    // 1. Mandatory Field Enforcement
+    if (!trimmedIdentifier || !password) {
+      Alert.alert("Authentication Failed", "Please fill in all mandatory fields.");
+      return;
+    }
+
+    // 2. Multi-Format Validation Check (Regex Patterns)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[0-9]{10}$/; // Adapts to standard 10 digit layouts
+
+    const isEmail = emailRegex.test(trimmedIdentifier);
+    const isPhone = phoneRegex.test(trimmedIdentifier);
+
+    if (!isEmail && !isPhone) {
+      Alert.alert(
+        "Invalid Input", 
+        "Please enter a valid email address or a 10-digit phone number."
+      );
+      return;
+    }
+
+    // 3. Password Integrity Boundary Check
+    if (password.length < 6) {
+      Alert.alert("Security Restriction", "Password must consist of at least 6 characters.");
+      return;
+    }
+
+    // Success State Handler (Ready for API integration layer)
+    Alert.alert("Success", "Authentication handshake successful! Syncing profile...");
+    console.log("Verified Auth Payload:", { loginId: trimmedIdentifier, password });
+    
+    // Router transition payload can be initialized here (e.g., router.replace('/dashboard'))
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
+        
+        {/* NATIVE BACK NAVIGATION HANDLER */}
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Feather name={"arrow-left" as any} size={20} color="#1E293B" />
+        </TouchableOpacity>
+
+        {/* ================= HERO GRAPHIC & LOGO HEADER ================= */}
+        <View style={styles.headerRow}>
+          <View style={styles.headerLeft}>
+            <Image 
+              source={require("../assets/images/logo.png")} 
+              style={styles.miniLogo} 
+            />
+            <Text style={styles.mainTitle}>Welcome <Text style={styles.accentText}>Back!</Text></Text>
+            <Text style={styles.subTitle}>
+              Login to continue your learning journey with Academy Hub.
+            </Text>
+          </View>
+          <Image 
+            source={require("../assets/images/Login-image.png")} // Change to login hero asset if uniquely managed
+            style={styles.topIllustration} 
+          />
+        </View>
+
+        {/* ================= CENTRAL AUTH CARD CONTEXT ================= */}
+        <View style={styles.formContainer}>
+          <Text style={styles.sectionTitle}>Login to your account</Text>
+          <Text style={styles.sectionSubTitle}>Enter your details below</Text>
+
+          {/* Identifier Input Box */}
+          <Text style={styles.inputLabel}>Email / Phone Number</Text>
+          <View style={styles.inputWrapper}>
+            <Feather name={"mail" as any} size={18} color="#94A3B8" style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your email or phone number"
+              placeholderTextColor="#94A3B8"
+              autoCapitalize="none"
+              autoCorrect={false}
+              value={identifier}
+              onChangeText={setIdentifier}
+            />
+          </View>
+
+          {/* Password Input Box */}
+          <Text style={styles.inputLabel}>Password</Text>
+          <View style={styles.inputWrapper}>
+            <Feather name={"lock" as any} size={18} color="#94A3B8" style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your password"
+              placeholderTextColor="#94A3B8"
+              secureTextEntry={securePass}
+              autoCapitalize="none"
+              autoCorrect={false}
+              value={password}
+              onChangeText={setPassword}
+            />
+            <TouchableOpacity onPress={() => setSecurePass(!securePass)}>
+              <Feather name={(securePass ? "eye-off" : "eye") as any} size={18} color="#94A3B8" />
+            </TouchableOpacity>
+          </View>
+
+          {/* FORGOT PASSWORD ANCHOR LINK */}
+          <TouchableOpacity 
+            style={styles.forgotContainer} 
+            onPress={() => Alert.alert("Reset Route", "Password recovery sub-system linkage.")}
+          >
+            <Text style={styles.forgotText}>Forgot Password?</Text>
+          </TouchableOpacity>
+
+          {/* PRIMARY EXECUTION GATEWAY */}
+          <TouchableOpacity style={styles.submitButton} activeOpacity={0.9} onPress={handleLogin}>
+            <Text style={styles.submitButtonText}>Login</Text>
+          </TouchableOpacity>
+
+          {/* OAUTH SECTION SPLITTER */}
+          <View style={styles.dividerRow}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or continue with</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          {/* IMMUTABLE BRAND INTEGRITY LOGOS */}
+          <View style={styles.socialRow}>
+            <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
+              <Ionicons name={"logo-google" as any} size={18} color="#EA4335" />
+              <Text style={styles.socialButtonText}>Google</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
+              <Ionicons name={"logo-apple" as any} size={20} color="#000000" style={{ marginTop: -2 }} />
+              <Text style={styles.socialButtonText}>Apple</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
+              <FontAwesome name={"facebook-official" as any} size={18} color="#1877F2" />
+              <Text style={styles.socialButtonText}>Facebook</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* CROSS NAVIGATION BOUNDARY */}
+          <View style={styles.footerRow}>
+            <Text style={styles.footerText}>Don’t have an account? </Text>
+            <TouchableOpacity onPress={() => router.push("/signup")}>
+              <Text style={styles.footerLink}>Sign Up</Text>
+            </TouchableOpacity>
+          </View>
+
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+// ================= ARCHITECTURAL LAYOUT & STYLESHEET =================
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#F8FAFC",
+  },
+  scrollContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 15,
+    marginBottom: 15,
+  },
+  headerLeft: {
+    flex: 1,
+    paddingRight: 10,
+  },
+  miniLogo: {
+    width: 150,
+    height: 100,
+    resizeMode: "contain",
+    marginLeft: -7,
+    marginBottom: -28,
+    marginTop: -13
+  },
+  mainTitle: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#1E293B",
+    lineHeight: 34,
+    marginTop: 5,
+  },
+  accentText: {
+    color: "#2563EB",
+  },
+  subTitle: {
+    fontSize: 13,
+    color: "#64748B",
+    marginTop: 8,
+    lineHeight: 18,
+  },
+  topIllustration: {
+    width: 135,
+    height: 135,
+    resizeMode: "contain",
+  },
+  formContainer: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
+    padding: 20,
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.06,
+    shadowRadius: 20,
+    elevation: 3,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1E293B",
+  },
+  sectionSubTitle: {
+    fontSize: 13,
+    color: "#64748B",
+    marginTop: 2,
+    marginBottom: 15,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#1E293B",
+    marginBottom: 6,
+    marginTop: 14,
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    height: 52,
+  },
+  inputIcon: {
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    color: "#1E293B",
+    fontSize: 14,
+  },
+  forgotContainer: {
+    alignSelf: "flex-end",
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  forgotText: {
+    color: "#2563EB",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  submitButton: {
+    backgroundColor: "#2563EB",
+    height: 52,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 15,
+    shadowColor: "#2563EB",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  submitButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  dividerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 22,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#E2E8F0",
+  },
+  dividerText: {
+    fontSize: 12,
+    color: "#94A3B8",
+    paddingHorizontal: 10,
+  },
+  socialRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  socialButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 12,
+    height: 46,
+    gap: 6,
+  },
+  socialButtonText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#334155",
+  },
+  footerRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 25,
+  },
+  footerText: {
+    fontSize: 14,
+    color: "#64748B",
+  },
+  footerLink: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#2563EB",
+  },
+});
