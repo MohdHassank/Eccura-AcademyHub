@@ -8,7 +8,7 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarShowLabel: false, 
+        tabBarShowLabel: false,
         tabBarStyle: styles.tabBar,
       }}
     >
@@ -24,7 +24,10 @@ export default function TabLayout() {
                 size={24}
                 color={focused ? "#00B686" : "#64748B"}
               />
-              <Text numberOfLines={1} style={[styles.tabLabel, focused && styles.activeTabLabel]}>
+              <Text
+                numberOfLines={1}
+                style={[styles.tabLabel, focused && styles.activeTabLabel]}
+              >
                 Perf.
               </Text>
             </View>
@@ -44,7 +47,10 @@ export default function TabLayout() {
                 size={22}
                 color={focused ? "#00B686" : "#64748B"}
               />
-              <Text numberOfLines={1} style={[styles.tabLabel, focused && styles.activeTabLabel]}>
+              <Text
+                numberOfLines={1}
+                style={[styles.tabLabel, focused && styles.activeTabLabel]}
+              >
                 Comm.
               </Text>
             </View>
@@ -64,7 +70,10 @@ export default function TabLayout() {
                 size={24}
                 color={focused ? "#00B686" : "#64748B"}
               />
-              <Text numberOfLines={1} style={[styles.tabLabel, focused && styles.activeTabLabel]}>
+              <Text
+                numberOfLines={1}
+                style={[styles.tabLabel, focused && styles.activeTabLabel]}
+              >
                 Home
               </Text>
             </View>
@@ -84,7 +93,10 @@ export default function TabLayout() {
                 size={22}
                 color={focused ? "#00B686" : "#64748B"}
               />
-              <Text numberOfLines={1} style={[styles.tabLabel, focused && styles.activeTabLabel]}>
+              <Text
+                numberOfLines={1}
+                style={[styles.tabLabel, focused && styles.activeTabLabel]}
+              >
                 Fees
               </Text>
             </View>
@@ -104,11 +116,31 @@ export default function TabLayout() {
                 size={22}
                 color={focused ? "#00B686" : "#64748B"}
               />
-              <Text numberOfLines={1} style={[styles.tabLabel, focused && styles.activeTabLabel]}>
+              <Text
+                numberOfLines={1}
+                style={[styles.tabLabel, focused && styles.activeTabLabel]}
+              >
                 Profile
               </Text>
             </View>
           ),
+        }}
+      />
+
+      {/* ======================================================= */}
+      {/* 🔥 EXTRA HIDDEN ROUTES (YAHAN SE EXTRA ARROW HAT JAYEGA) */}
+      {/* ======================================================= */}
+      <Tabs.Screen
+        name="Academics"
+        options={{
+          href: null, // ✨ Yeh line niche se extra down arrow/icon ko permanently hide kar degi!
+        }}
+      />
+
+      <Tabs.Screen
+        name="TestPractice"
+        options={{
+          href: null, // ✨ Yeh line niche se extra down arrow/icon ko permanently hide kar degi!
         }}
       />
     </Tabs>
@@ -118,19 +150,17 @@ export default function TabLayout() {
 // ============== PREMIUM BOTTOM-FIXED STYLING ==============
 const styles = StyleSheet.create({
   tabBar: {
-    // position: "absolute",
-    bottom: 6, // Bottom space ko khatam kiya taaki peeche ka background na jhaanke
-    left: 0,   // Full width edge-to-edge layout
-    right: 0,  // Full width edge-to-edge layout
+    bottom: 9, // Isko ekdum 0 kar diya taaki screen ke bottom se space perfect alignment mein rahe
+    left: 0,
+    right: 0,
     backgroundColor: "#FFFFFF",
-    height: Platform.OS === "ios" ? 88 : 68, // iOS ke safe area notch ke liye extra height
+    height: Platform.OS === "ios" ? 88 : 68,
     borderTopWidth: 1,
-    borderTopColor: "#E2E8F0", // Premium subtle top divider line
+    borderTopColor: "#E2E8F0",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingBottom: Platform.OS === "ios" ? 22 : 8, // Device navigation bar ke upar safe text placement
-    // Soft standard top shadow shadow
+    paddingBottom: Platform.OS === "ios" ? 22 : 8,
     shadowColor: "#000000",
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.04,
@@ -144,8 +174,8 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   tabLabel: {
-    fontSize: 12, // Ekdum sahi readable font size
-    fontWeight: "600", // Solid Premium Bold text
+    fontSize: 12,
+    fontWeight: "600",
     color: "#64748B",
     marginTop: 4,
     textAlign: "center",

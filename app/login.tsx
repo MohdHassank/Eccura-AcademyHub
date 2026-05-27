@@ -1,19 +1,19 @@
+import { Feather, FontAwesome, Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  Alert,
+  Dimensions,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
-  View,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  SafeAreaView,
-  Image,
-  Dimensions,
-  StatusBar,
-  Alert,
+  View,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { Feather, FontAwesome, Ionicons } from "@expo/vector-icons";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -31,7 +31,10 @@ export default function LoginPage() {
 
     // 1. Mandatory Field Enforcement
     if (!trimmedIdentifier || !password) {
-      Alert.alert("Authentication Failed", "Please fill in all mandatory fields.");
+      Alert.alert(
+        "Authentication Failed",
+        "Please fill in all mandatory fields.",
+      );
       return;
     }
 
@@ -44,54 +47,70 @@ export default function LoginPage() {
 
     if (!isEmail && !isPhone) {
       Alert.alert(
-        "Invalid Input", 
-        "Please enter a valid email address or a 10-digit phone number."
+        "Invalid Input",
+        "Please enter a valid email address or a 10-digit phone number.",
       );
       return;
     }
 
     // 3. Password Integrity Boundary Check
     if (password.length < 6) {
-      Alert.alert("Security Restriction", "Password must consist of at least 6 characters.");
+      Alert.alert(
+        "Security Restriction",
+        "Password must consist of at least 6 characters.",
+      );
       return;
     }
 
     // Success State Handler (Ready for API integration layer)
-    console.log("Verified Auth Payload:", { loginId: trimmedIdentifier, password });
-    
+    console.log("Verified Auth Payload:", {
+      loginId: trimmedIdentifier,
+      password,
+    });
+
     // ==========================================
     // 🔥 FIXED: ROUTER REDIRECTION STATE TO MAIN DASHBOARD
     // ==========================================
     // router.replace lagaya hai taaki login hone ke baad user back button daba ke login screen par na aa sake
-    router.replace("/(tabs)");
+
+    
+  router.replace('/(tabs)');
+
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
-        
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContainer}
+      >
         {/* NATIVE BACK NAVIGATION HANDLER */}
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
           <Feather name="arrow-left" size={20} color="#1E293B" />
         </TouchableOpacity>
 
         {/* ================= HERO GRAPHIC & LOGO HEADER ================= */}
         <View style={styles.headerRow}>
           <View style={styles.headerLeft}>
-            <Image 
-              source={require("../assets/images/logo.png")} 
-              style={styles.miniLogo} 
+            <Image
+              source={require("../assets/images/logo.png")}
+              style={styles.miniLogo}
             />
-            <Text style={styles.mainTitle}>Welcome <Text style={styles.accentText}>Back!</Text></Text>
+            <Text style={styles.mainTitle}>
+              Welcome <Text style={styles.accentText}>Back!</Text>
+            </Text>
             <Text style={styles.subTitle}>
               Login to continue your learning journey with Academy Hub.
             </Text>
           </View>
-          <Image 
-            source={require("../assets/images/Login-image.png")} 
-            style={styles.topIllustration} 
+          <Image
+            source={require("../assets/images/Login-image.png")}
+            style={styles.topIllustration}
           />
         </View>
 
@@ -103,7 +122,12 @@ export default function LoginPage() {
           {/* Identifier Input Box */}
           <Text style={styles.inputLabel}>Email / Phone Number</Text>
           <View style={styles.inputWrapper}>
-            <Feather name="mail" size={18} color="#94A3B8" style={styles.inputIcon} />
+            <Feather
+              name="mail"
+              size={18}
+              color="#94A3B8"
+              style={styles.inputIcon}
+            />
             <TextInput
               style={styles.input}
               placeholder="Enter your email or phone number"
@@ -118,7 +142,12 @@ export default function LoginPage() {
           {/* Password Input Box */}
           <Text style={styles.inputLabel}>Password</Text>
           <View style={styles.inputWrapper}>
-            <Feather name="lock" size={18} color="#94A3B8" style={styles.inputIcon} />
+            <Feather
+              name="lock"
+              size={18}
+              color="#94A3B8"
+              style={styles.inputIcon}
+            />
             <TextInput
               style={styles.input}
               placeholder="Enter your password"
@@ -130,20 +159,33 @@ export default function LoginPage() {
               onChangeText={setPassword}
             />
             <TouchableOpacity onPress={() => setSecurePass(!securePass)}>
-              <Feather name={securePass ? "eye-off" : "eye"} size={18} color="#94A3B8" />
+              <Feather
+                name={securePass ? "eye-off" : "eye"}
+                size={18}
+                color="#94A3B8"
+              />
             </TouchableOpacity>
           </View>
 
           {/* FORGOT PASSWORD ANCHOR LINK */}
-          <TouchableOpacity 
-            style={styles.forgotContainer} 
-            onPress={() => Alert.alert("Reset Route", "Password recovery sub-system linkage.")}
+          <TouchableOpacity
+            style={styles.forgotContainer}
+            onPress={() =>
+              Alert.alert(
+                "Reset Route",
+                "Password recovery sub-system linkage.",
+              )
+            }
           >
             <Text style={styles.forgotText}>Forgot Password?</Text>
           </TouchableOpacity>
 
           {/* PRIMARY EXECUTION GATEWAY */}
-          <TouchableOpacity style={styles.submitButton} activeOpacity={0.9} onPress={handleLogin}>
+          <TouchableOpacity
+            style={styles.submitButton}
+            activeOpacity={0.9}
+            onPress={handleLogin}
+          >
             <Text style={styles.submitButtonText}>Login</Text>
           </TouchableOpacity>
 
@@ -160,9 +202,14 @@ export default function LoginPage() {
               <Ionicons name="logo-google" size={18} color="#EA4335" />
               <Text style={styles.socialButtonText}>Google</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
-              <Ionicons name="logo-apple" size={20} color="#000000" style={{ marginTop: -2 }} />
+              <Ionicons
+                name="logo-apple"
+                size={20}
+                color="#000000"
+                style={{ marginTop: -2 }}
+              />
               <Text style={styles.socialButtonText}>Apple</Text>
             </TouchableOpacity>
 
@@ -179,7 +226,6 @@ export default function LoginPage() {
               <Text style={styles.footerLink}>Sign Up</Text>
             </TouchableOpacity>
           </View>
-
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -229,7 +275,7 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
     marginLeft: -7,
     marginBottom: -28,
-    marginTop: -13
+    marginTop: -13,
   },
   mainTitle: {
     fontSize: 28,

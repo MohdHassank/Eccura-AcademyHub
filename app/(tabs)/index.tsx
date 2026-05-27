@@ -5,10 +5,12 @@ import {
     MaterialCommunityIcons,
     MaterialIcons,
 } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
     Dimensions,
     Image,
+    Platform,
     SafeAreaView,
     ScrollView,
     StatusBar,
@@ -21,6 +23,7 @@ import {
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function HomePage() {
+  const router = useRouter();
   // Active states for original home sections
   const [activeTestTab, setActiveTestTab] = useState("Upcoming");
 
@@ -197,10 +200,10 @@ export default function HomePage() {
         {/* ================= SECTION 4: QUICK ACTIONS GRID ================= */}
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionHeadingText}>Quick Actions</Text>
-          <TouchableOpacity style={styles.seeAllRowContainer}>
+          {/* <TouchableOpacity style={styles.seeAllRowContainer}>
             <Text style={styles.seeAllActionText}>View All</Text>
             <Feather name="chevron-right" size={14} color="#2563EB" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         <ScrollView
@@ -231,7 +234,10 @@ export default function HomePage() {
         {/* ================= SECTION 5: ACADEMICS CONTENT CARDS ================= */}
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionHeadingText}>Academics</Text>
-          <TouchableOpacity style={styles.seeAllRowContainer}>
+          <TouchableOpacity
+            style={styles.seeAllRowContainer}
+            onPress={() => router.push("/(tabs)/Academics")} // 🔥 Yeh line navigation handle karegi
+          >
             <Text style={styles.seeAllActionText}>View All</Text>
             <Feather name="chevron-right" size={14} color="#2563EB" />
           </TouchableOpacity>
@@ -312,7 +318,10 @@ export default function HomePage() {
         {/* ================= SECTION 6: TEST & PRACTICE SEGMENT ================= */}
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionHeadingText}>Test & Practice</Text>
-          <TouchableOpacity style={styles.seeAllRowContainer}>
+          <TouchableOpacity
+            style={styles.seeAllRowContainer}
+            onPress={() => router.push("/(tabs)/TestPractice")} // 🔥 Bracket ke andar aa gaya
+          >
             <Text style={styles.seeAllActionText}>View All</Text>
             <Feather name="chevron-right" size={14} color="#2563EB" />
           </TouchableOpacity>
@@ -406,55 +415,73 @@ export default function HomePage() {
           </TouchableOpacity>
         </View>
 
-
         {/* ========================================================
             🔥 NEW INTEGRATED SECTION: ENGAGEMENT DASHBOARD MODULE 🔥
            ======================================================== */}
-        
+
         <View style={[styles.sectionHeaderRow, { marginTop: 35 }]}>
           <Text style={styles.sectionHeadingText}>Engagement</Text>
-          <Text style={styles.engagementTopSubtitle}>Track updates & ranks</Text>
+          <Text style={styles.engagementTopSubtitle}>
+            Track updates & ranks
+          </Text>
         </View>
 
         {/* 1. GRID BLOCKS: LEADERBOARD & STUDY STREAK */}
         <View style={styles.engagementGridContainer}>
-          
           {/* LEFT COMPONENT: Leaderboard */}
           <View style={styles.engagementHalfCard}>
             <View style={styles.cardHeaderInlineFlex}>
               <View style={styles.titleIconRowLayout}>
-                <MaterialCommunityIcons name="trophy-variant" size={16} color="#6366F1" />
+                <MaterialCommunityIcons
+                  name="trophy-variant"
+                  size={16}
+                  color="#6366F1"
+                />
                 <Text style={styles.engagementCardTitle}>Leaderboard</Text>
               </View>
               <TouchableOpacity style={styles.miniLinkButton}>
-  <Text style={styles.miniLinkText}>View All</Text>
-</TouchableOpacity>
+                <Text style={styles.miniLinkText}>View All</Text>
+              </TouchableOpacity>
             </View>
-            <Text style={styles.engagementCardDesc}>Ranked among your class peers</Text>
+            <Text style={styles.engagementCardDesc}>
+              Ranked among your class peers
+            </Text>
 
             {/* List Array Render */}
             <View style={styles.leaderboardStackList}>
               {leaderboardData.map((item, index) => (
-                <View 
-                  key={index} 
+                <View
+                  key={index}
                   style={[
-                    styles.leaderboardPillRow, 
-                    item.isUser && styles.leaderboardPillRowActive
+                    styles.leaderboardPillRow,
+                    item.isUser && styles.leaderboardPillRowActive,
                   ]}
                 >
                   <View style={styles.leaderboardLeftGroup}>
-                    <View style={[
-                      styles.rankNumberBadge,
-                      item.rank === 1 && { backgroundColor: '#FCD34D' },
-                      item.rank === 2 && { backgroundColor: '#E2E8F0' },
-                      item.rank === 3 && { backgroundColor: '#F97316' },
-                      item.rank > 3 && { backgroundColor: '#F1F5F9' }
-                    ]}>
-                      <Text style={[styles.rankNumberText, item.rank > 3 && { color: '#64748B' }]}>{item.rank}</Text>
+                    <View
+                      style={[
+                        styles.rankNumberBadge,
+                        item.rank === 1 && { backgroundColor: "#FCD34D" },
+                        item.rank === 2 && { backgroundColor: "#E2E8F0" },
+                        item.rank === 3 && { backgroundColor: "#F97316" },
+                        item.rank > 3 && { backgroundColor: "#F1F5F9" },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.rankNumberText,
+                          item.rank > 3 && { color: "#64748B" },
+                        ]}
+                      >
+                        {item.rank}
+                      </Text>
                     </View>
-                    <Text 
-                      numberOfLines={1} 
-                      style={[styles.leaderboardNameText, item.isUser && { fontWeight: '700', color: '#4F46E5' }]}
+                    <Text
+                      numberOfLines={1}
+                      style={[
+                        styles.leaderboardNameText,
+                        item.isUser && { fontWeight: "700", color: "#4F46E5" },
+                      ]}
                     >
                       {item.name}
                     </Text>
@@ -476,7 +503,9 @@ export default function HomePage() {
               <MaterialCommunityIcons name="fire" size={16} color="#F97316" />
               <Text style={styles.engagementCardTitle}>Study Streak</Text>
             </View>
-            <Text style={styles.engagementCardDesc}>Keep up the daily hard work!</Text>
+            <Text style={styles.engagementCardDesc}>
+              Keep up the daily hard work!
+            </Text>
 
             {/* Streak Counter Wheel Ring Graphic */}
             <View style={styles.wheelCenterLayout}>
@@ -490,13 +519,22 @@ export default function HomePage() {
 
             {/* Calendar Minimalist Tracker Dots */}
             <View style={styles.streakDaysRowContainer}>
-              {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, idx) => {
+              {["M", "T", "W", "T", "F", "S", "S"].map((day, idx) => {
                 const isActive = idx < 5; // Active Monday to Friday
                 return (
                   <View key={idx} style={styles.dayStatusColumn}>
                     <Text style={styles.dayTextLabel}>{day}</Text>
-                    <View style={[styles.dayStatusDot, isActive ? styles.dayStatusDotActive : styles.dayStatusDotInactive]}>
-                      {isActive && <Ionicons name="checkmark" size={8} color="#FFFFFF" />}
+                    <View
+                      style={[
+                        styles.dayStatusDot,
+                        isActive
+                          ? styles.dayStatusDotActive
+                          : styles.dayStatusDotInactive,
+                      ]}
+                    >
+                      {isActive && (
+                        <Ionicons name="checkmark" size={8} color="#FFFFFF" />
+                      )}
                     </View>
                   </View>
                 );
@@ -505,7 +543,9 @@ export default function HomePage() {
 
             <View style={styles.bestStreakInfoAlert}>
               <FontAwesome5 name="trophy" size={10} color="#D97706" />
-              <Text style={styles.bestStreakAlertText}>Best: <Text style={{fontWeight: '700'}}>21 Days</Text></Text>
+              <Text style={styles.bestStreakAlertText}>
+                Best: <Text style={{ fontWeight: "700" }}>21 Days</Text>
+              </Text>
             </View>
           </View>
         </View>
@@ -515,14 +555,18 @@ export default function HomePage() {
           <View style={styles.cardHeaderInlineFlex}>
             <View style={styles.titleIconRowLayout}>
               <Ionicons name="trending-up-outline" size={18} color="#4F46E5" />
-              <Text style={styles.engagementFullBlockTitle}>Study Progress</Text>
+              <Text style={styles.engagementFullBlockTitle}>
+                Study Progress
+              </Text>
             </View>
             <View style={styles.mockSelectorDropdown}>
               <Text style={styles.mockSelectorText}>This Semester</Text>
               <Feather name="chevron-down" size={12} color="#475569" />
             </View>
           </View>
-          <Text style={styles.engagementCardDesc}>Monitor overall completed syllabus tracks</Text>
+          <Text style={styles.engagementCardDesc}>
+            Monitor overall completed syllabus tracks
+          </Text>
 
           {/* Graph Coordinate Vector Area Blocks */}
           <View style={styles.graphBlockFlexRowContainer}>
@@ -533,12 +577,17 @@ export default function HomePage() {
                   <Text style={styles.radialSubLabelText}>Done</Text>
                 </View>
               </View>
-              <Text style={styles.metaDoneCountText}><Text style={{fontWeight: '700', color: '#4F46E5'}}>34/50</Text> Chapters</Text>
+              <Text style={styles.metaDoneCountText}>
+                <Text style={{ fontWeight: "700", color: "#4F46E5" }}>
+                  34/50
+                </Text>{" "}
+                Chapters
+              </Text>
             </View>
 
             {/* Line Chart Grid Lines Representation */}
             <View style={styles.graphScaleAxisRightPanel}>
-              {['100%', '50%', '0%'].map((val, gridIdx) => (
+              {["100%", "50%", "0%"].map((val, gridIdx) => (
                 <View key={gridIdx} style={styles.graphGridLineFlexRow}>
                   <Text style={styles.axisYLabelText}>{val}</Text>
                   <View style={styles.gridHorizontalHairline} />
@@ -553,8 +602,15 @@ export default function HomePage() {
           </View>
 
           <View style={styles.insightInlinePillBanner}>
-            <MaterialCommunityIcons name="lightning-bolt" size={14} color="#7C3AED" />
-            <Text style={styles.insightInlinePillText}>Awesome! You're scoring ahead of <Text style={{fontWeight: '700'}}>65% peers.</Text></Text>
+            <MaterialCommunityIcons
+              name="lightning-bolt"
+              size={14}
+              color="#7C3AED"
+            />
+            <Text style={styles.insightInlinePillText}>
+              Awesome! You're scoring ahead of{" "}
+              <Text style={{ fontWeight: "700" }}>65% peers.</Text>
+            </Text>
           </View>
         </View>
 
@@ -562,9 +618,13 @@ export default function HomePage() {
         <View style={styles.engagementFullCardContainer}>
           <View style={styles.titleIconRowLayout}>
             <MaterialIcons name="verified-user" size={18} color="#7C3AED" />
-            <Text style={styles.engagementFullBlockTitle}>Achievement System</Text>
+            <Text style={styles.engagementFullBlockTitle}>
+              Achievement System
+            </Text>
           </View>
-          <Text style={styles.engagementCardDesc}>Unlock unique tracking milestones</Text>
+          <Text style={styles.engagementCardDesc}>
+            Unlock unique tracking milestones
+          </Text>
 
           {/* Progress Status Header Metrics */}
           <View style={styles.badgeProgressMetricRow}>
@@ -572,7 +632,7 @@ export default function HomePage() {
             <Text style={styles.badgeMetricValue}>6 / 10</Text>
           </View>
           <View style={styles.linearTrackBase}>
-            <View style={[styles.linearTrackFill, { width: '60%' }]} />
+            <View style={[styles.linearTrackFill, { width: "60%" }]} />
           </View>
 
           {/* Horizontal Scroller Carousel for Badges */}
@@ -583,7 +643,12 @@ export default function HomePage() {
           >
             {/* Badge Item Node 1 */}
             <View style={styles.badgeItemCardBox}>
-              <View style={[styles.badgeIconCircleContainer, { backgroundColor: '#FEF3C7' }]}>
+              <View
+                style={[
+                  styles.badgeIconCircleContainer,
+                  { backgroundColor: "#FEF3C7" },
+                ]}
+              >
                 <FontAwesome5 name="trophy" size={16} color="#D97706" />
               </View>
               <Text style={styles.badgeCardTitle}>First Step</Text>
@@ -595,8 +660,17 @@ export default function HomePage() {
 
             {/* Badge Item Node 2 */}
             <View style={styles.badgeItemCardBox}>
-              <View style={[styles.badgeIconCircleContainer, { backgroundColor: '#DBEAFE' }]}>
-                <MaterialCommunityIcons name="book-open-page-variant" size={18} color="#2563EB" />
+              <View
+                style={[
+                  styles.badgeIconCircleContainer,
+                  { backgroundColor: "#DBEAFE" },
+                ]}
+              >
+                <MaterialCommunityIcons
+                  name="book-open-page-variant"
+                  size={18}
+                  color="#2563EB"
+                />
               </View>
               <Text style={styles.badgeCardTitle}>Explorer</Text>
               <Text style={styles.badgeCardSubtitle}>Study 5 days</Text>
@@ -606,17 +680,28 @@ export default function HomePage() {
             </View>
 
             {/* Badge Item Node 3 (Locked State Representation) */}
-            <View style={[styles.badgeItemCardBox, { backgroundColor: '#F8FAFC', borderColor: '#E2E8F0' }]}>
-              <View style={[styles.badgeIconCircleContainer, { backgroundColor: '#E2E8F0' }]}>
+            <View
+              style={[
+                styles.badgeItemCardBox,
+                { backgroundColor: "#F8FAFC", borderColor: "#E2E8F0" },
+              ]}
+            >
+              <View
+                style={[
+                  styles.badgeIconCircleContainer,
+                  { backgroundColor: "#E2E8F0" },
+                ]}
+              >
                 <Feather name="lock" size={14} color="#64748B" />
               </View>
-              <Text style={[styles.badgeCardTitle, { color: '#64748B' }]}>Unstoppable</Text>
+              <Text style={[styles.badgeCardTitle, { color: "#64748B" }]}>
+                Unstoppable
+              </Text>
               <Text style={styles.badgeCardSubtitle}>Maintain 15d streak</Text>
               <Text style={styles.lockedFractionProgressText}>7 / 15 Days</Text>
             </View>
           </ScrollView>
         </View>
-
       </ScrollView>
     </SafeAreaView>
   );
@@ -636,15 +721,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    height: 60,
+    // 🔥 StatusBar ke niche space badhane ke liye padding-top aur height ko adjust kiya
+    paddingTop:
+      Platform.OS === "android" ? (StatusBar.currentHeight || 24) + 11 : 11,
+    height: Platform.OS === "android" ? 110 : 94, // Status bar ki height ko mila kar perfect size
     backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
     borderColor: "#F1F5F9",
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.02,
+    shadowRadius: 4,
+    elevation: 2,
   },
   menuIconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
+    width: 42,
+    height: 42,
+    borderRadius: 12,
     backgroundColor: "#F8FAFC",
     alignItems: "center",
     justifyContent: "center",
@@ -655,16 +748,17 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    height: "100%",
   },
   brandLogo: {
-    width: 160,
-    height: 40,
+    width: 265,
+    height: 115,
     resizeMode: "contain",
   },
   bellIconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
+    width: 42,
+    height: 42,
+    borderRadius: 12,
     backgroundColor: "#F8FAFC",
     alignItems: "center",
     justifyContent: "center",
@@ -1115,7 +1209,7 @@ const styles = StyleSheet.create({
     borderWidth: 5,
     borderColor: "#FFEDD5",
     borderTopColor: "#F97316",
-    borderRightColor: '#F97316',
+    borderRightColor: "#F97316",
     justifyContent: "center",
     alignItems: "center",
   },
