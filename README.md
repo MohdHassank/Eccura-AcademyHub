@@ -1,50 +1,122 @@
-# Welcome to your Expo app 👋
+# AcademyHub 
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+An advanced, premium-grade educational management and learning experience mobile application built with React Native and Expo. AcademyHub streamlines student performance tracking, academic resources, communication, and fee operations into a unified, responsive interface.
 
-## Get started
+---
 
-1. Install dependencies
+## Project Objective
+The primary objective of **AcademyHub** is to bridge the gap between educational institutions and students by providing an intuitive, offline-ready, and highly responsive mobile platform. It replaces fragmented management systems with automated routing layers, real-time performance metrics, and a structured learning ecosystem optimized for any Android or iOS device standard.
 
-   ```bash
-   npm install
-   ```
+---
 
-2. Start the app
+## Key Features
+- **Smart Gateway Navigation:** Production-grade authentication guards that strictly anchor fresh sessions onto an optimized Landing Page before initializing dashboard layers.
+- **Dynamic Performance Analytical Trackers:** Real-time modular grids visualizing academic progress, timeline charts, and badge metrics.
+- **Centralized Academics Vault:** Structured distribution systems for quick-access to Notes, Assignments, Question Papers, and Recorded Lectures.
+- **Premium Bottom Tab Navigation:** Custom-engineered fluid tab-bar system configured with strict screen overlays (`href: null` encapsulation) to mask internal navigational modules flawlessly.
+- **Responsive Layout Architecture:** Adaptive design schemas leveraging dynamic safe area offsets, scroll views, and platform-specific styling configurations to prevent layout collisions across heterogeneous device screen heights.
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## Technology Stack
+- **Framework:** React Native (Expo SDK)
+- **Navigation Engine:** Expo Router v3 (File-based Strict Dynamic Routing)
+- **Programming Language:** TypeScript (TSX)
+- **UI Components:** React Native Core Components with custom theme wrappers
+- **Build System:** EAS (Expo Application Services) Cloud Native Engine
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+  ---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Setup & Installation Guide
 
-## Get a fresh project
+Follow these step-by-step instructions to set up the **AcademyHub** development environment on your local machine.
 
-When you're ready, run:
+## Prerequisites
+
+Before starting, ensure you have the following installed on your system:
+
+- **Node.js (LTS Version)** – https://nodejs.org/
+- **Git** – https://git-scm.com/
+- **Visual Studio Code (VS Code)** – Recommended IDE
+- **Expo Go App** installed on your Android/iOS device for testing
+
+---
+
+## Step 1: Clone the Repository
+
+Open your terminal and run:
 
 ```bash
-npm run reset-project
+git clone https://github.com/MohdHassank/AcademyHub.git
+cd AcademyHub
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## Step 2: Install Dependencies
 
-To learn more about developing your project with Expo, look at the following resources:
+Navigate to the project root folder (where `package.json` exists) and run:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npm install
+```
 
-## Join the community
+This will install all required project dependencies.
 
-Join our community of developers creating universal apps.
+---
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+
+## Step 3: Install EAS CLI
+
+EAS CLI is required for cloud builds and deployment.
+
+```bash
+npm install -g eas-cli
+```
+
+Verify installation:
+
+```bash
+eas --version
+```
+
+---
+
+## Step 4: Login to Expo
+
+Authenticate your Expo account:
+
+```bash
+eas login
+```
+
+Enter your Expo username/email and password when prompted.
+
+---
+
+## Step 5: Run the Application
+
+Start the development server:
+
+```bash
+npx expo start --clear
+```
+
+---
+
+## Testing on Mobile
+
+### Android
+
+1. Install **Expo Go** from Google Play Store.
+2. Open Expo Go.
+3. Scan the QR code displayed in the terminal/browser.
+
+### iPhone (iOS)
+
+1. Install **Expo Go** from App Store.
+2. Open Camera.
+3. Scan the QR code displayed by Expo.
+
+---
