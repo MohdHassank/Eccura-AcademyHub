@@ -3,6 +3,10 @@ import { Tabs } from "expo-router";
 import React from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
 
+export const unstable_settings = {
+  initialRouteName: "home",
+};
+
 export default function TabLayout() {
   return (
     <Tabs
@@ -60,7 +64,7 @@ export default function TabLayout() {
 
       {/* 3. CENTER HOME TAB */}
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
           title: "Home",
           tabBarIcon: ({ focused }) => (

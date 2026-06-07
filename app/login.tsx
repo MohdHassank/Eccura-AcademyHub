@@ -74,7 +74,7 @@ export default function LoginPage() {
     // router.replace lagaya hai taaki login hone ke baad user back button daba ke login screen par na aa sake
 
     
-  router.replace('/(tabs)');
+  router.replace('/(tabs)/home');
 
   };
 

@@ -58,7 +58,7 @@ export default function SignUpPage() {
     }
 
     console.log("Verified SignUp Payload:", { fullName, email, phone, selectedRole });
-    router.replace("/(tabs)");
+    router.replace("/(tabs)/home");
   };
 
   return (
