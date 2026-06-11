@@ -1,10 +1,11 @@
 import { useRouter } from "expo-router";
 import React from "react";
+import { wp, hp, RF } from "../utils/responsive";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   Dimensions,
   FlatList,
   Image,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -105,23 +106,23 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F7FBFE" },
   scrollContent: { paddingHorizontal: 24, alignItems: "center", paddingBottom: 30 },
   logoContainer: { alignItems: "center", marginTop: 4, marginBottom: -49, width: "100%" },
-  actualLogo: { width: 450, height: 200, resizeMode: "contain" },
+  actualLogo: { width: wp(90), height: hp(22), resizeMode: "contain" },
   heroContainer: { alignItems: "center", marginBottom: 24 },
-  mainHeading: { fontSize: 34, fontWeight: "800", textAlign: "center", letterSpacing: -0.8, lineHeight: 42, color: "#1E293B" },
-  illustrationContainer: { width: "100%", height: 280, justifyContent: "center", alignItems: "center", marginBottom: 20 },
+  mainHeading: { fontSize: RF(34), fontWeight: "800", textAlign: "center", letterSpacing: -0.8, lineHeight: 42, color: "#1E293B" },
+  illustrationContainer: { width: "100%", height: hp(32), justifyContent: "center", alignItems: "center", marginBottom: 20 },
   mockupImage: { width: "100%", height: "100%", borderRadius: 24, resizeMode: "cover" },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#CBD5E1", marginHorizontal: 5 },
   activeDot: { width: 24, backgroundColor: "#2563EB" },
   inactiveDot: { width: 8, backgroundColor: "#CBD5E1" },
   primaryButton: { width: "100%", backgroundColor: "#2563EB", paddingVertical: 16, borderRadius: 16, alignItems: "center", shadowColor: "#2563EB", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.25, shadowRadius: 10, elevation: 4 },
-  buttonText: { color: "#FFFFFF", fontSize: 16, fontWeight: "700" },
+  buttonText: { color: "#FFFFFF", fontSize: RF(16), fontWeight: "700" },
   loginRow: { flexDirection: "row", marginTop: 20 },
   alreadyText: { fontSize: 14, color: "#64748B" },
   loginLink: { fontSize: 14, fontWeight: "700", color: "#2563EB" },
   sliderWrapper: { width: "100%", alignItems: "center", marginVertical: 15 },
   slideCard: { width: SCREEN_WIDTH - 48, alignItems: "center", paddingHorizontal: 10 },
   iconCircle: { width: 50, height: 50, borderRadius: 25, justifyContent: "center", alignItems: "center", marginBottom: 10 },
-  featureTitle: { fontSize: 16, fontWeight: "700", color: "#1E293B", textAlign: "center" },
-  featureDesc: { fontSize: 13, color: "#64748B", textAlign: "center", marginTop: 4, lineHeight: 18 },
+  featureTitle: { fontSize: RF(16), fontWeight: "700", color: "#1E293B", textAlign: "center" },
+  featureDesc: { fontSize: RF(13), color: "#64748B", textAlign: "center", marginTop: 4, lineHeight: 18 },
   paginationDotsContainer: { flexDirection: "row", alignItems: "center", justifyContent: "center", marginTop: 15, marginBottom: 15 },
 });

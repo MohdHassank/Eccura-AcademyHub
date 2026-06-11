@@ -1,19 +1,19 @@
+import { Feather, FontAwesome, FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Dimensions,
-    Image,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-    Alert,
+  Alert,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  ActivityIndicator,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
-import { Feather, FontAwesome5, FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -27,45 +27,99 @@ export default function SignUpPage() {
   const [securePass, setSecurePass] = useState(true);
   const [secureConfirmPass, setSecureConfirmPass] = useState(true);
 
-  const [selectedRole, setSelectedRole] = useState("student"); 
+  const [selectedRole, setSelectedRole] = useState("student");
   const [isAgreed, setIsAgreed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (!fullName.trim() || !email.trim() || !phone.trim() || !password || !confirmPassword) {
       Alert.alert("Registration Failed", "Please fill all the mandatory fields!");
       return;
     }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (!emailRegex.test(email.trim())) {
       Alert.alert("Invalid Email", "Please enter a valid email address!");
       return;
     }
+
     if (phone.trim().length < 10) {
       Alert.alert("Invalid Phone", "Please enter a valid 10-digit phone number!");
       return;
     }
+
     if (password.length < 6) {
       Alert.alert("Security Restriction", "Password must be at least 6 characters long!");
       return;
     }
+
     if (password !== confirmPassword) {
       Alert.alert("Security Mismatch", "Passwords do not match!");
       return;
     }
+
     if (!isAgreed) {
       Alert.alert("Policy Agreement Required", "You must agree to the Terms of Service!");
       return;
     }
 
-    console.log("Verified SignUp Payload:", { fullName, email, phone, selectedRole });
-    router.replace("/(tabs)/home");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(
+        "http://192.168.29.49:5000/api/auth/signup",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            fullName: fullName.trim(),
+            email: email.trim().toLowerCase(),
+            phone: phone.trim(),
+            password,
+            role: selectedRole,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        Alert.alert(
+          "Success 🎉",
+          data.message || "Account created successfully!",
+          [
+            {
+              text: "OK",
+              onPress: () => router.push("/login"),
+            },
+          ]
+        );
+      } else {
+        Alert.alert(
+          "Signup Failed",
+          data.message || "Something went wrong."
+        );
+      }
+    } catch (error) {
+      console.log(error);
+
+      Alert.alert(
+        "Network Error",
+        "Unable to connect to backend server."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
-        
+
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Feather name="arrow-left" size={20} color="#1E293B" />
         </TouchableOpacity>
@@ -157,8 +211,22 @@ export default function SignUpPage() {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.submitButton} activeOpacity={0.9} onPress={handleSignUp}>
-            <Text style={styles.submitButtonText}>Create Account</Text>
+          <TouchableOpacity
+            style={[
+              styles.submitButton,
+              isLoading && { backgroundColor: "#93C5FD" },
+            ]}
+            activeOpacity={0.9}
+            onPress={handleSignUp}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.submitButtonText}>
+                Create Account
+              </Text>
+            )}
           </TouchableOpacity>
 
           <View style={styles.dividerRow}>
