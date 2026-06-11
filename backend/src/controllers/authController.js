@@ -87,6 +87,79 @@ const signup = async (req, res) => {
   }
 };
 
+const login = async (req, res) => {
+  try {
+    const { identifier, password } = req.body;
+
+    // 1. Mandatory Field Check
+    if (!identifier || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation Error: Identifier and password are required.",
+      });
+    }
+
+    // 2. Query Object Setup
+    const request = new sql.Request();
+
+    // 3. Search user by Email OR Phone number dynamically
+    // SQL Server parameter security bind setup
+    const findUserQuery = `
+      SELECT id, fullName, email, phone, password, role 
+      FROM Students 
+      WHERE email = @Identifier OR phone = @Identifier
+    `;
+
+    const result = await request
+      .input("Identifier", sql.NVarChar(100), identifier.trim())
+      .query(findUserQuery);
+
+    // 4. Case: User Not Found
+    if (result.recordset.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found: The provided email or phone number is not registered.",
+      });
+    }
+
+    // Agar user mil jata hai toh database ka raw record nikalte hain
+    const user = result.recordset[0];
+
+    // 5. Compare Hashed Password using bcryptjs
+    // user.password plain text nahi hai, wo hash string hai
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    // 6. Case: Invalid Password Mismatch
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication Failed: Invalid password structure.",
+      });
+    }
+
+    // 7. Success Authentication! Send required payload parameters
+    return res.status(200).json({
+      success: true,
+      message: "Authentication successful! Welcome back 🎉",
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role
+      }
+    });
+
+  } catch (error) {
+    console.error("❌ Error inside login controller:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error occurred during login phase.",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   signup,
+  login
 };

@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   ScrollView,
   StatusBar,
+  ActivityIndicator,
   StyleSheet,
   Text,
   TextInput,
@@ -24,59 +25,83 @@ export default function LoginPage() {
   const [identifier, setIdentifier] = useState(""); // Email or Phone number
   const [password, setPassword] = useState("");
   const [securePass, setSecurePass] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Commercial-Grade Authentication Validation
-  const handleLogin = () => {
-    const trimmedIdentifier = identifier.trim();
+  const handleLogin = async () => {
+  const trimmedIdentifier = identifier.trim();
 
-    // 1. Mandatory Field Enforcement
-    if (!trimmedIdentifier || !password) {
-      Alert.alert(
-        "Authentication Failed",
-        "Please fill in all mandatory fields.",
-      );
-      return;
-    }
+  // 1. Mandatory Field Enforcement
+  if (!trimmedIdentifier || !password) {
+    Alert.alert("Authentication Failed", "Please fill in all mandatory fields.");
+    return;
+  }
 
-    // 2. Multi-Format Validation Check (Regex Patterns)
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^[0-9]{10}$/; // Adapts to standard 10 digit layouts
+  // 2. Multi-Format Validation Check (Regex Patterns)
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^[0-9]{10}$/;
 
-    const isEmail = emailRegex.test(trimmedIdentifier);
-    const isPhone = phoneRegex.test(trimmedIdentifier);
+  const isEmail = emailRegex.test(trimmedIdentifier);
+  const isPhone = phoneRegex.test(trimmedIdentifier);
 
-    if (!isEmail && !isPhone) {
-      Alert.alert(
-        "Invalid Input",
-        "Please enter a valid email address or a 10-digit phone number.",
-      );
-      return;
-    }
+  if (!isEmail && !isPhone) {
+    Alert.alert(
+      "Invalid Input",
+      "Please enter a valid email address or a 10-digit phone number.",
+    );
+    return;
+  }
 
-    // 3. Password Integrity Boundary Check
-    if (password.length < 6) {
-      Alert.alert(
-        "Security Restriction",
-        "Password must consist of at least 6 characters.",
-      );
-      return;
-    }
+  // 3. Password Integrity Boundary Check
+  if (password.length < 6) {
+    Alert.alert(
+      "Security Restriction",
+      "Password must consist of at least 6 characters.",
+    );
+    return;
+  }
 
-    // Success State Handler (Ready for API integration layer)
-    console.log("Verified Auth Payload:", {
-      loginId: trimmedIdentifier,
-      password,
+  // 🚀 Start API Integration Logic Layer
+  setIsLoading(true);
+
+  try {
+    const response = await fetch("http://192.168.29.49:5000/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        identifier: trimmedIdentifier,
+        password: password,
+      }),
     });
 
-    // ==========================================
-    // 🔥 FIXED: ROUTER REDIRECTION STATE TO MAIN DASHBOARD
-    // ==========================================
-    // router.replace lagaya hai taaki login hone ke baad user back button daba ke login screen par na aa sake
+    const data = await response.json();
 
-    
-  router.replace('/(tabs)/home');
-
-  };
+    if (response.ok && data.success) {
+      // Login successful!
+      console.log("Authenticated User Payload Data:", data.user);
+      
+      Alert.alert("Welcome Back! 🎉", data.message, [
+        {
+          text: "Let's Go",
+          onPress: () => router.replace("/(tabs)/home"), // Safely route to Dashboard
+        },
+      ]);
+    } else {
+      // Backend Validation Errors (User not found OR Invalid Password)
+      Alert.alert("Login Failed ❌", data.message || "Invalid credentials.");
+    }
+  } catch (error) {
+    console.error("Login Network Request Error:", error);
+    Alert.alert(
+      "Network Timeout 🌐",
+      "Unable to talk to AcademyHub server. Check your system's IP endpoint connection!"
+    );
+  } finally {
+    setIsLoading(false); // Turn off loader overlay
+  }
+};
 
   return (
     <SafeAreaView style={styles.container}>
@@ -181,13 +206,19 @@ export default function LoginPage() {
           </TouchableOpacity>
 
           {/* PRIMARY EXECUTION GATEWAY */}
-          <TouchableOpacity
-            style={styles.submitButton}
-            activeOpacity={0.9}
-            onPress={handleLogin}
-          >
-            <Text style={styles.submitButtonText}>Login</Text>
-          </TouchableOpacity>
+          {/* Import ActivityIndicator component from 'react-native' at top */}
+<TouchableOpacity
+  style={[styles.submitButton, isLoading && { backgroundColor: "#93C5FD" }]}
+  activeOpacity={0.9}
+  onPress={handleLogin}
+  disabled={isLoading} // Anti-spam block
+>
+  {isLoading ? (
+    <ActivityIndicator size="small" color="#FFFFFF" />
+  ) : (
+    <Text style={styles.submitButtonText}>Login</Text>
+  )}
+</TouchableOpacity>
 
           {/* OAUTH SECTION SPLITTER */}
           <View style={styles.dividerRow}>
