@@ -5,11 +5,11 @@ import {
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 import React from "react";
 import {
   Dimensions,
   Platform,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,

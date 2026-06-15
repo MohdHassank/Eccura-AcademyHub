@@ -1,6 +1,7 @@
 import { Feather, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   Alert,
   Dimensions,
@@ -29,79 +30,84 @@ export default function LoginPage() {
 
   // Commercial-Grade Authentication Validation
   const handleLogin = async () => {
-  const trimmedIdentifier = identifier.trim();
+    const trimmedIdentifier = identifier.trim();
 
-  // 1. Mandatory Field Enforcement
-  if (!trimmedIdentifier || !password) {
-    Alert.alert("Authentication Failed", "Please fill in all mandatory fields.");
-    return;
-  }
-
-  // 2. Multi-Format Validation Check (Regex Patterns)
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const phoneRegex = /^[0-9]{10}$/;
-
-  const isEmail = emailRegex.test(trimmedIdentifier);
-  const isPhone = phoneRegex.test(trimmedIdentifier);
-
-  if (!isEmail && !isPhone) {
-    Alert.alert(
-      "Invalid Input",
-      "Please enter a valid email address or a 10-digit phone number.",
-    );
-    return;
-  }
-
-  // 3. Password Integrity Boundary Check
-  if (password.length < 6) {
-    Alert.alert(
-      "Security Restriction",
-      "Password must consist of at least 6 characters.",
-    );
-    return;
-  }
-
-  // 🚀 Start API Integration Logic Layer
-  setIsLoading(true);
-
-  try {
-    const response = await fetch("http://192.168.29.49:5000/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        identifier: trimmedIdentifier,
-        password: password,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (response.ok && data.success) {
-      // Login successful!
-      console.log("Authenticated User Payload Data:", data.user);
-      
-      Alert.alert("Welcome Back! 🎉", data.message, [
-        {
-          text: "Let's Go",
-          onPress: () => router.replace("/(tabs)/home"), // Safely route to Dashboard
-        },
-      ]);
-    } else {
-      // Backend Validation Errors (User not found OR Invalid Password)
-      Alert.alert("Login Failed ❌", data.message || "Invalid credentials.");
+    // 1. Mandatory Field Enforcement
+    if (!trimmedIdentifier || !password) {
+      Alert.alert("Authentication Failed", "Please fill in all mandatory fields.");
+      return;
     }
-  } catch (error) {
-    console.error("Login Network Request Error:", error);
-    Alert.alert(
-      "Network Timeout 🌐",
-      "Unable to talk to AcademyHub server. Check your system's IP endpoint connection!"
-    );
-  } finally {
-    setIsLoading(false); // Turn off loader overlay
-  }
-};
+
+    // 2. Multi-Format Validation Check (Regex Patterns)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[0-9]{10}$/;
+
+    const isEmail = emailRegex.test(trimmedIdentifier);
+    const isPhone = phoneRegex.test(trimmedIdentifier);
+
+    if (!isEmail && !isPhone) {
+      Alert.alert(
+        "Invalid Input",
+        "Please enter a valid email address or a 10-digit phone number.",
+      );
+      return;
+    }
+
+    // 3. Password Integrity Boundary Check
+    if (password.length < 6) {
+      Alert.alert(
+        "Security Restriction",
+        "Password must consist of at least 6 characters.",
+      );
+      return;
+    }
+
+    // 🚀 Start API Integration Logic Layer
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("http://192.168.29.49:5000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          identifier: trimmedIdentifier,
+          password: password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+
+        await AsyncStorage.setItem(
+          "user",
+          JSON.stringify(data.user)
+        );
+
+        console.log("Authenticated User Payload Data:", data.user);
+
+        Alert.alert("Welcome Back! 🎉", data.message, [
+          {
+            text: "Let's Go",
+            onPress: () => router.replace("/(tabs)/home"), // Safely route to Dashboard
+          },
+        ]);
+      } else {
+        // Backend Validation Errors (User not found OR Invalid Password)
+        Alert.alert("Login Failed ❌", data.message || "Invalid credentials.");
+      }
+    } catch (error) {
+      console.error("Login Network Request Error:", error);
+      Alert.alert(
+        "Network Timeout 🌐",
+        "Unable to talk to AcademyHub server. Check your system's IP endpoint connection!"
+      );
+    } finally {
+      setIsLoading(false); // Turn off loader overlay
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -207,18 +213,18 @@ export default function LoginPage() {
 
           {/* PRIMARY EXECUTION GATEWAY */}
           {/* Import ActivityIndicator component from 'react-native' at top */}
-<TouchableOpacity
-  style={[styles.submitButton, isLoading && { backgroundColor: "#93C5FD" }]}
-  activeOpacity={0.9}
-  onPress={handleLogin}
-  disabled={isLoading} // Anti-spam block
->
-  {isLoading ? (
-    <ActivityIndicator size="small" color="#FFFFFF" />
-  ) : (
-    <Text style={styles.submitButtonText}>Login</Text>
-  )}
-</TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.submitButton, isLoading && { backgroundColor: "#93C5FD" }]}
+            activeOpacity={0.9}
+            onPress={handleLogin}
+            disabled={isLoading} // Anti-spam block
+          >
+            {isLoading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Text style={styles.submitButtonText}>Login</Text>
+            )}
+          </TouchableOpacity>
 
           {/* OAUTH SECTION SPLITTER */}
           <View style={styles.dividerRow}>

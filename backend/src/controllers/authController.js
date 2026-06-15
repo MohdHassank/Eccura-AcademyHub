@@ -142,11 +142,12 @@ const login = async (req, res) => {
       success: true,
       message: "Authentication successful! Welcome back 🎉",
       user: {
-        id: user.id,
-        fullName: user.fullName,
-        email: user.email,
-        role: user.role
-      }
+  id: user.id,
+  fullName: user.fullName,
+  email: user.email,
+  phone: user.phone,
+  role: user.role
+}
     });
 
   } catch (error) {
@@ -159,7 +160,43 @@ const login = async (req, res) => {
   }
 };
 
+const updateProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { fullName, email, phone } = req.body;
+
+    const request = new sql.Request();
+
+    await request
+      .input("Id", sql.Int, id)
+      .input("FullName", sql.NVarChar(100), fullName)
+      .input("Email", sql.NVarChar(100), email)
+      .input("Phone", sql.NVarChar(15), phone)
+      .query(`
+        UPDATE Students
+        SET fullName = @FullName,
+            email = @Email,
+            phone = @Phone
+        WHERE id = @Id
+      `);
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully"
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
 module.exports = {
   signup,
-  login
+  login,
+  updateProfile
 };

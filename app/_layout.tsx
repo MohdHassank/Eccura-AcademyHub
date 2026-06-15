@@ -6,6 +6,8 @@ import { View, ActivityIndicator } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import 'react-native-reanimated';
 import { useColorScheme } from '../hooks/use-color-scheme';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 
 export const unstable_settings = {
   initialRouteName: 'landing',

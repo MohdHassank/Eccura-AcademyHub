@@ -1,28 +1,123 @@
-import React, { useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
-  Dimensions,
-  Switch,
-} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import {
   Feather,
   FontAwesome5,
-  Ionicons,
   MaterialCommunityIcons,
-  MaterialIcons,
+  MaterialIcons
 } from "@expo/vector-icons";
+import {
+  Alert,
+  Dimensions,
+  Image,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+  Modal,
+  TextInput,
+} from "react-native";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function ProfileScreen() {
+
+  const router = useRouter();
+
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem("user");
+
+      router.replace("/login");
+    } catch (error) {
+      console.log("Logout Error:", error);
+    }
+  };
+
+  useEffect(() => {
+    loadUser();
+  }, []);
+
+const handleProfileUpdate = async () => {
+  try {
+    const response = await fetch(
+      `http://192.168.29.49:5000/api/auth/profile/${user.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: editName,
+          email: editEmail,
+          phone: editPhone,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.success) {
+      const updatedUser = {
+        ...user,
+        fullName: editName,
+        email: editEmail,
+        phone: editPhone,
+      };
+
+      await AsyncStorage.setItem(
+        "user",
+        JSON.stringify(updatedUser)
+      );
+
+      setUser(updatedUser);
+
+      setModalVisible(false);
+
+      Alert.alert(
+        "Success 🎉",
+        "Profile updated successfully"
+      );
+    } else {
+      Alert.alert(
+        "Error",
+        data.message
+      );
+    }
+  } catch (error) {
+    console.log(error);
+
+    Alert.alert(
+      "Network Error",
+      "Unable to connect to server"
+    );
+  }
+};
+
+  const loadUser = async () => {
+    try {
+      const savedUser = await AsyncStorage.getItem("user");
+
+      if (savedUser) {
+        setUser(JSON.parse(savedUser));
+      }
+    } catch (error) {
+      console.log("User Load Error:", error);
+    }
+  };
+  const [user, setUser] = useState<any>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editPhone, setEditPhone] = useState("");
 
   // Mock User Analytics (Engagement Metrics)
   const userStats = [
@@ -49,13 +144,21 @@ export default function ProfileScreen() {
           <Feather name="chevron-left" size={24} color="#1E293B" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Profile</Text>
-        <TouchableOpacity style={styles.editButton}>
+        <TouchableOpacity
+          style={styles.editButton}
+          onPress={() => {
+            setEditName(user?.fullName || "");
+            setEditEmail(user?.email || "");
+            setEditPhone(user?.phone || "");
+            setModalVisible(true);
+          }}
+        >
           <Feather name="edit-3" size={18} color="#4F46E5" />
         </TouchableOpacity>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
-        
+
         {/* ================= HERO PROFILE CARD ================= */}
         <View style={styles.profileHeroSection}>
           <View style={styles.avatarContainer}>
@@ -70,9 +173,15 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.userNameText}>Arjun Sharma</Text>
-          <Text style={styles.userMetaText}>B.Tech CSE • Section A</Text>
-          <Text style={styles.userRollText}>Roll No: 2026CSE1084</Text>
+          <Text style={styles.userNameText}>
+            {user?.fullName || "Loading..."}
+          </Text>
+          <Text style={styles.userMetaText}>
+            {user?.role || "Student"}
+          </Text>
+          <Text style={styles.userRollText}>
+            {user?.email || ""}
+          </Text>
 
           {/* Quick Level Indicator */}
           <View style={styles.levelBadgePill}>
@@ -103,10 +212,10 @@ export default function ProfileScreen() {
           <Text style={styles.menuSectionHeadingText}>Academic Center</Text>
           <View style={styles.menuCardBoxWrapper}>
             {menuItems.map((item, index) => (
-              <TouchableOpacity 
-                key={item.id} 
+              <TouchableOpacity
+                key={item.id}
                 style={[
-                  styles.menuRowItem, 
+                  styles.menuRowItem,
                   index === menuItems.length - 1 && { borderBottomWidth: 0 }
                 ]}
               >
@@ -156,7 +265,10 @@ export default function ProfileScreen() {
         </View>
 
         {/* ================= SIGN OUT ACCOUNT ACTION ================= */}
-        <TouchableOpacity style={styles.logoutActionRowButton}>
+        <TouchableOpacity
+          style={styles.logoutActionRowButton}
+          onPress={handleLogout}
+        >
           <MaterialIcons name="logout" size={18} color="#EF4444" />
           <Text style={styles.logoutButtonText}>Sign Out Account</Text>
         </TouchableOpacity>
@@ -164,6 +276,82 @@ export default function ProfileScreen() {
         {/* Version Footer Label */}
         <Text style={styles.appVersionFooterLabel}>v2.4.0 • Made with ❤️ for Students</Text>
       </ScrollView>
+      <Modal
+  visible={modalVisible}
+  transparent
+  animationType="slide"
+>
+  <View
+    style={{
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.4)",
+      justifyContent: "center",
+      alignItems: "center",
+    }}
+  >
+    <View
+      style={{
+        width: "90%",
+        backgroundColor: "#fff",
+        borderRadius: 20,
+        padding: 20,
+      }}
+    >
+      <Text
+        style={{
+          fontSize: 20,
+          fontWeight: "700",
+          marginBottom: 20,
+        }}
+      >
+        Edit Profile
+      </Text>
+
+      <TextInput
+        value={editName}
+        onChangeText={setEditName}
+        placeholder="Full Name"
+        style={styles.input}
+      />
+
+      <TextInput
+        value={editEmail}
+        onChangeText={setEditEmail}
+        placeholder="Email"
+        style={styles.input}
+      />
+
+      <TextInput
+        value={editPhone}
+        onChangeText={setEditPhone}
+        placeholder="Phone"
+        style={styles.input}
+      />
+
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          marginTop: 15,
+        }}
+      >
+        <TouchableOpacity
+          onPress={() => setModalVisible(false)}
+          style={styles.cancelBtn}
+        >
+          <Text style={{ color: "#fff" }}>Cancel</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={handleProfileUpdate}
+          style={styles.saveBtn}
+        >
+          <Text style={{ color: "#fff" }}>Save</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </View>
+</Modal>
     </SafeAreaView>
   );
 }
@@ -389,4 +577,26 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     marginTop: 20,
   },
+   input: {
+  borderWidth: 1,
+  borderColor: "#CBD5E1",
+  borderRadius: 10,
+  paddingHorizontal: 12,
+  height: 50,
+  marginBottom: 12,
+},
+
+saveBtn: {
+  backgroundColor: "#2563EB",
+  paddingHorizontal: 25,
+  paddingVertical: 12,
+  borderRadius: 10,
+},
+
+cancelBtn: {
+  backgroundColor: "#EF4444",
+  paddingHorizontal: 25,
+  paddingVertical: 12,
+  borderRadius: 10,
+},
 });
