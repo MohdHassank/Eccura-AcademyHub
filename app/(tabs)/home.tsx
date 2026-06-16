@@ -1,70 +1,77 @@
 import {
-    Feather,
-    FontAwesome5,
-    Ionicons,
-    MaterialCommunityIcons,
-    MaterialIcons,
+  Feather,
+  FontAwesome5,
+  Ionicons,
+  MaterialCommunityIcons,
+  MaterialIcons,
 } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-    Dimensions,
-    Image,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  Image,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
 
 export default function HomePage() {
   const router = useRouter();
   // Active states for original home sections
   const [activeTestTab, setActiveTestTab] = useState("Upcoming");
+  const [user, setUser] = useState<any>(null);
+  const [dashboard, setDashboard] = useState<any>(null);
 
   // Mock Data sets mirroring the Figma context explicitly
-  const quickActions = [
-    {
-      id: "qa1",
-      title: "Notes",
-      icon: "file-text",
-      color: "#6366F1",
-      bg: "#EEF2FF",
-    },
-    {
-      id: "qa2",
-      title: "Assignments",
-      icon: "clipboard",
-      color: "#10B981",
-      bg: "#ECFDF5",
-    },
-    {
-      id: "qa3",
-      title: "Tests / Quiz",
-      icon: "file-signature",
-      color: "#F97316",
-      bg: "#FFF7ED",
-    },
-    {
-      id: "qa4",
-      title: "Attendance",
-      icon: "calendar-check",
-      color: "#3B82F6",
-      bg: "#EFF6FF",
-    },
-    {
-      id: "qa5",
-      title: "Fee Status",
-      icon: "wallet",
-      color: "#EC4899",
-      bg: "#FDF2F8",
-    },
-  ];
+ const quickActions = [
+  {
+    id: "qa1",
+    title: `Notes (${dashboard?.notesCount ?? 0})`,
+    icon: "file-text",
+    color: "#6366F1",
+    bg: "#EEF2FF",
+  },
+  {
+    id: "qa2",
+    title: `Assignments (${dashboard?.assignmentCount ?? 0})`,
+    icon: "clipboard",
+    color: "#10B981",
+    bg: "#ECFDF5",
+  },
+  {
+    id: "qa3",
+    title: `Tests / Quiz (${dashboard?.testCount ?? 0})`,
+    icon: "file-signature",
+    color: "#F97316",
+    bg: "#FFF7ED",
+  },
+  {
+    id: "qa4",
+    title: `Attendance (${dashboard?.attendancePercent ?? 0}%)`,
+    icon: "calendar-check",
+    color: "#3B82F6",
+    bg: "#EFF6FF",
+  },
+  {
+    id: "qa5",
+    title:
+      dashboard?.pendingFees > 0
+        ? `Fees (₹${dashboard.pendingFees})`
+        : "Fees (Paid)",
+    icon: "wallet",
+    color: "#EC4899",
+    bg: "#FDF2F8",
+  },
+];
 
   const testSchedules = [
     {
@@ -114,6 +121,36 @@ export default function HomePage() {
     { rank: 5, name: "Ishita Verma", xp: "7,430 XP", isUser: false },
   ];
 
+  useEffect(() => {
+    loadDashboard();
+  }, []);
+
+  const loadDashboard = async () => {
+    try {
+      const storedUser = await AsyncStorage.getItem("user");
+
+      if (!storedUser) return;
+
+      const parsedUser = JSON.parse(storedUser);
+
+      setUser(parsedUser);
+
+      const response = await fetch(
+        `http://192.168.29.49:5000/api/student/dashboard/${parsedUser.id}`
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        setDashboard(data.dashboard);
+
+        console.log("Dashboard Data:", data.dashboard);
+      }
+    } catch (error) {
+      console.log("Dashboard Error:", error);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
@@ -146,7 +183,9 @@ export default function HomePage() {
         {/* ================= SECTION 2: USER PROFILE ROW ================= */}
         <View style={styles.profileRow}>
           <View>
-            <Text style={styles.userGreetingTitle}>Hi, Arjun! 👋</Text>
+            <Text style={styles.userGreetingTitle}>
+              Hi, {user?.fullName || "Student"} 👋
+            </Text>
             <Text style={styles.userGreetingSubtitle}>
               Ready to learn something new today?
             </Text>
@@ -159,12 +198,14 @@ export default function HomePage() {
               style={styles.avatarImage}
             />
             <View style={styles.roleTagContainer}>
-              <Text style={styles.roleTagText}>Student</Text>
+              <Text style={styles.roleTagText}>
+                {user?.role || "student"}
+              </Text>
+
               <Feather
                 name="chevron-down"
                 size={10}
                 color="#FFFFFF"
-                style={{ marginLeft: 2 }}
               />
             </View>
           </View>

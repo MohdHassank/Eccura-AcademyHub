@@ -19,6 +19,10 @@ app.get("/", (req, res) => {
 // 5. Authentication Routes ko Mount (Link) karna
 app.use("/api/auth", authRoutes);
 
+const studentRoutes = require("./routes/studentRoutes");
+
+app.use("/api/student", studentRoutes);
+
 // 6. Server ki port define karna aur listen karna
 const PORT = 5000;
 app.listen(PORT, () => {
