@@ -1,201 +1,233 @@
 const { sql } = require("../config/db");
 
 const getDashboard = async (req, res) => {
-  try {
-    const { id } = req.params;
+    try {
+        const { id } = req.params;
 
-    const request = new sql.Request();
+        const request = new sql.Request();
 
-    const result = await request
-      .input("StudentId", sql.Int, id)
-      .query(`
+        const result = await request
+            .input("StudentId", sql.Int, id)
+            .query(`
         SELECT TOP 1 *
         FROM DashboardStats
         WHERE studentId = @StudentId
       `);
 
-    if (result.recordset.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Dashboard data not found"
-      });
+        if (result.recordset.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Dashboard data not found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            dashboard: result.recordset[0]
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
     }
-
-    return res.status(200).json({
-      success: true,
-      dashboard: result.recordset[0]
-    });
-
-  } catch (error) {
-    console.log(error);
-
-    return res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
 };
 
 const getNotes = async (req, res) => {
-  try {
-    const { id } = req.params;
+    try {
+        const { id } = req.params;
 
-    const request = new sql.Request();
+        const request = new sql.Request();
 
-    const result = await request
-      .input("StudentId", sql.Int, id)
-      .query(`
+        const result = await request
+            .input("StudentId", sql.Int, id)
+            .query(`
         SELECT *
         FROM Notes
         WHERE studentId = @StudentId
         ORDER BY id DESC
       `);
 
-    return res.status(200).json({
-      success: true,
-      notes: result.recordset
-    });
+        return res.status(200).json({
+            success: true,
+            notes: result.recordset
+        });
 
-  } catch (error) {
-    console.log(error);
+    } catch (error) {
+        console.log(error);
 
-    return res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
 };
 
 const getAssignments = async (req, res) => {
-  try {
+    try {
 
-    const { id } = req.params;
+        const { id } = req.params;
 
-    const request = new sql.Request();
+        const request = new sql.Request();
 
-    const result = await request
-      .input("StudentId", sql.Int, id)
-      .query(`
+        const result = await request
+            .input("StudentId", sql.Int, id)
+            .query(`
         SELECT *
         FROM Assignments
         WHERE studentId = @StudentId
         ORDER BY id DESC
       `);
 
-    return res.status(200).json({
-      success: true,
-      assignments: result.recordset
-    });
+        return res.status(200).json({
+            success: true,
+            assignments: result.recordset
+        });
 
-  } catch (error) {
+    } catch (error) {
 
-    return res.status(500).json({
-      success: false,
-      message: error.message
-    });
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
 
-  }
+    }
 };
 
 const getpreviousPapers = async (req, res) => {
-  try {
+    try {
 
-    const { id } = req.params;
+        const { id } = req.params;
 
-    const request = new sql.Request();
+        const request = new sql.Request();
 
-    const result = await request
-      .input("StudentId", sql.Int, id)
-      .query(`
+        const result = await request
+            .input("StudentId", sql.Int, id)
+            .query(`
         SELECT *
         FROM previousPapers
         WHERE studentId = @StudentId
         ORDER BY year DESC
       `);
 
-    return res.status(200).json({
-      success: true,
-      papers: result.recordset
-    });
+        return res.status(200).json({
+            success: true,
+            papers: result.recordset
+        });
 
-  } catch (error) {
+    } catch (error) {
 
-    return res.status(500).json({
-      success: false,
-      message: error.message
-    });
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
 
-  }
+    }
 };
 
 const getRecordedLectures = async (req, res) => {
-  try {
+    try {
 
-    const { id } = req.params;
+        const { id } = req.params;
 
-    const request = new sql.Request();
+        const request = new sql.Request();
 
-    const result = await request
-      .input("StudentId", sql.Int, id)
-      .query(`
+        const result = await request
+            .input("StudentId", sql.Int, id)
+            .query(`
         SELECT *
         FROM RecordedLectures
         WHERE studentId = @StudentId
         ORDER BY id DESC
       `);
 
-    return res.status(200).json({
-      success: true,
-      lectures: result.recordset
-    });
+        return res.status(200).json({
+            success: true,
+            lectures: result.recordset
+        });
 
-  } catch (error) {
+    } catch (error) {
 
-    return res.status(500).json({
-      success: false,
-      message: error.message
-    });
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
 
-  }
+    }
 };
 
-const getSyllabusTracker = async (req,res) => {
+const getSyllabusTracker = async (req, res) => {
 
-  try {
+    try {
 
-    const { id } = req.params;
+        const { id } = req.params;
 
-    const request = new sql.Request();
+        const request = new sql.Request();
 
-    const result = await request
-      .input("StudentId", sql.Int, id)
-      .query(`
+        const result = await request
+            .input("StudentId", sql.Int, id)
+            .query(`
         SELECT *
         FROM SyllabusTracker
         WHERE studentId = @StudentId
       `);
 
-    return res.status(200).json({
-      success:true,
-      syllabus: result.recordset
-    });
+        return res.status(200).json({
+            success: true,
+            syllabus: result.recordset
+        });
 
-  } catch(error){
+    } catch (error) {
 
-    return res.status(500).json({
-      success:false,
-      message:error.message
-    });
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
 
-  }
+    }
 
 };
 
+const getNotifications = async (req, res) => {
+    try {
+
+        const { id } = req.params;
+
+        const request = new sql.Request();
+
+        const result = await request
+            .input("StudentId", sql.Int, id)
+            .query(`
+        SELECT *
+        FROM Notifications
+        WHERE studentId = @StudentId
+        ORDER BY createdAt DESC
+      `);
+
+        return res.status(200).json({
+            success: true,
+            notifications: result.recordset
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+};
+
 module.exports = {
-  getDashboard,
-  getNotes,
-  getAssignments,
-  getpreviousPapers,
+    getDashboard,
+    getNotes,
+    getAssignments,
+    getpreviousPapers,
     getRecordedLectures,
-    getSyllabusTracker
+    getSyllabusTracker,
+    getNotifications
 };

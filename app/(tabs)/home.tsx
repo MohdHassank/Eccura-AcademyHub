@@ -6,11 +6,14 @@ import {
   MaterialIcons,
 } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Dimensions,
   Image,
+  Modal,
   Platform,
   SafeAreaView,
   ScrollView,
@@ -30,48 +33,51 @@ export default function HomePage() {
   const [activeTestTab, setActiveTestTab] = useState("Upcoming");
   const [user, setUser] = useState<any>(null);
   const [dashboard, setDashboard] = useState<any>(null);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<{ title: string }[]>([]);
+  
 
   // Mock Data sets mirroring the Figma context explicitly
- const quickActions = [
-  {
-    id: "qa1",
-    title: `Notes (${dashboard?.notesCount ?? 0})`,
-    icon: "file-text",
-    color: "#6366F1",
-    bg: "#EEF2FF",
-  },
-  {
-    id: "qa2",
-    title: `Assignments (${dashboard?.assignmentCount ?? 0})`,
-    icon: "clipboard",
-    color: "#10B981",
-    bg: "#ECFDF5",
-  },
-  {
-    id: "qa3",
-    title: `Tests / Quiz (${dashboard?.testCount ?? 0})`,
-    icon: "file-signature",
-    color: "#F97316",
-    bg: "#FFF7ED",
-  },
-  {
-    id: "qa4",
-    title: `Attendance (${dashboard?.attendancePercent ?? 0}%)`,
-    icon: "calendar-check",
-    color: "#3B82F6",
-    bg: "#EFF6FF",
-  },
-  {
-    id: "qa5",
-    title:
-      dashboard?.pendingFees > 0
-        ? `Fees (₹${dashboard.pendingFees})`
-        : "Fees (Paid)",
-    icon: "wallet",
-    color: "#EC4899",
-    bg: "#FDF2F8",
-  },
-];
+  const quickActions = [
+    {
+      id: "qa1",
+      title: `Notes (${dashboard?.notesCount ?? 0})`,
+      icon: "file-text",
+      color: "#6366F1",
+      bg: "#EEF2FF",
+    },
+    {
+      id: "qa2",
+      title: `Assignments (${dashboard?.assignmentCount ?? 0})`,
+      icon: "clipboard",
+      color: "#10B981",
+      bg: "#ECFDF5",
+    },
+    {
+      id: "qa3",
+      title: `Tests / Quiz (${dashboard?.testCount ?? 0})`,
+      icon: "file-signature",
+      color: "#F97316",
+      bg: "#FFF7ED",
+    },
+    {
+      id: "qa4",
+      title: `Attendance (${dashboard?.attendancePercent ?? 0}%)`,
+      icon: "calendar-check",
+      color: "#3B82F6",
+      bg: "#EFF6FF",
+    },
+    {
+      id: "qa5",
+      title:
+        dashboard?.pendingFees > 0
+          ? `Fees (₹${dashboard.pendingFees})`
+          : "Fees (Paid)",
+      icon: "wallet",
+      color: "#EC4899",
+      bg: "#FDF2F8",
+    },
+  ];
 
   const testSchedules = [
     {
@@ -123,6 +129,7 @@ export default function HomePage() {
 
   useEffect(() => {
     loadDashboard();
+    fetchNotifications();
   }, []);
 
   const loadDashboard = async () => {
@@ -151,6 +158,26 @@ export default function HomePage() {
     }
   };
 
+  const fetchNotifications = async () => {
+    try {
+
+      const userData = await AsyncStorage.getItem("user");
+
+      if (!userData) return;
+
+      const user = JSON.parse(userData);
+
+      const response = await axios.get(
+        `http://192.168.29.49:5000/api/student/notifications/${user.id}`
+      );
+
+      setNotifications(response.data.notifications);
+
+    } catch (error) {
+      console.log("Notification Error:", error);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
@@ -168,10 +195,16 @@ export default function HomePage() {
           />
         </View>
 
-        <TouchableOpacity style={styles.bellIconButton}>
+        <TouchableOpacity
+          style={styles.bellIconButton}
+          onPress={() => setShowNotifications(true)}
+        >
           <Feather name="bell" size={22} color="#1E293B" />
+
           <View style={styles.badgeIndicator}>
-            <Text style={styles.badgeText}>3</Text>
+            <Text style={styles.badgeText}>
+              {notifications.length}
+            </Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -720,6 +753,45 @@ export default function HomePage() {
               </View>
             </View>
 
+<Modal
+  visible={showNotifications}
+  transparent
+  animationType="fade"
+>
+  <TouchableOpacity
+    style={styles.modalOverlay}
+    activeOpacity={1}
+    onPress={() => setShowNotifications(false)}
+  >
+    <View style={styles.notificationModal}>
+
+      <Text style={styles.notificationTitle}>
+        Notifications
+      </Text>
+
+      {notifications.length === 0 ? (
+        <Text>No notifications available</Text>
+      ) : (
+        notifications.map((item: any) => (
+          <View
+            key={item.id}
+            style={styles.notificationItem}
+          >
+            <Text style={styles.notificationItemTitle}>
+              🔔 {item.title}
+            </Text>
+
+            <Text style={styles.notificationMessage}>
+              {item.message}
+            </Text>
+          </View>
+        ))
+      )}
+
+    </View>
+  </TouchableOpacity>
+</Modal>
+
             {/* Badge Item Node 3 (Locked State Representation) */}
             <View
               style={[
@@ -745,6 +817,7 @@ export default function HomePage() {
         </View>
       </ScrollView>
     </SafeAreaView>
+    
   );
 }
 
@@ -1513,4 +1586,44 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginTop: 4,
   },
+
+modalOverlay: {
+  flex: 1,
+  backgroundColor: "rgba(0,0,0,0.4)",
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+notificationModal: {
+  width: "90%",
+  backgroundColor: "#FFF",
+  borderRadius: 20,
+  padding: 20,
+  maxHeight: "70%",
+},
+
+notificationTitle: {
+  fontSize: 22,
+  fontWeight: "700",
+  marginBottom: 15,
+},
+
+notificationItem: {
+  paddingVertical: 12,
+  borderBottomWidth: 1,
+  borderBottomColor: "#E5E7EB",
+},
+
+notificationItemTitle: {
+  fontSize: 16,
+  fontWeight: "600",
+  color: "#1E293B",
+},
+
+notificationMessage: {
+  marginTop: 4,
+  color: "#64748B",
+  fontSize: 14,
+},
+
 });
