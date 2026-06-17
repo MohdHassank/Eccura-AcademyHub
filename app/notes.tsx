@@ -1,27 +1,28 @@
-import React, { useState, useEffect } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Feather, FontAwesome5, Ionicons } from "@expo/vector-icons";
+import axios from "axios";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
+  Alert,
+  Dimensions,
+  FlatList,
+  StatusBar,
   StyleSheet,
   Text,
-  View,
   TextInput,
   TouchableOpacity,
-  FlatList,
-  Dimensions,
-  StatusBar,
-  ActivityIndicator,
-  Alert
+  View
 } from "react-native";
-import { Feather, FontAwesome5, Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 // ================= TYPESCRIPT INTERFACES =================
 interface NoteItem {
-  id: string;
+  id: number;
+  studentId: number;
   title: string;
-  subject: "Physics" | "Chemistry" | "Mathematics" | "Computer Science";
+  subject: string;
   description: string;
   faculty: string;
   uploadDate: string;
@@ -31,53 +32,53 @@ interface NoteItem {
 type FilterType = "All" | "Physics" | "Chemistry" | "Mathematics" | "Computer Science";
 
 // ================= DUMMY ACADEMIC DATA =================
-const DUMMY_NOTES: NoteItem[] = [
-  {
-    id: "1",
-    title: "Electrostatics & Gauss Law",
-    subject: "Physics",
-    description: "Comprehensive class notes covering electric fields, potential, flux, and Gauss law applications.",
-    faculty: "Dr. Alok Rai (Physics Dept.)",
-    uploadDate: "15 June 2026",
-    fileSize: "4.2 MB"
-  },
-  {
-    id: "2",
-    title: "Organic Chemistry: Unit 2 Reaction Mechanisms",
-    subject: "Chemistry",
-    description: "Detailed step-by-step mechanisms for SN1, SN2, E1, and E2 reactions with major exceptions.",
-    faculty: "Prof. S. Sharma (Chemistry Dept.)",
-    uploadDate: "12 June 2026",
-    fileSize: "5.8 MB"
-  },
-  {
-    id: "3",
-    title: "Differential Equations & Applications",
-    subject: "Mathematics",
-    description: "First-order and second-order linear differential equations solved with engineering application modeling.",
-    faculty: "Dr. Amit Verma (Maths Dept.)",
-    uploadDate: "10 June 2026",
-    fileSize: "3.1 MB"
-  },
-  {
-    id: "4",
-    title: "Data Structures: Binary Trees & Graphs",
-    subject: "Computer Science",
-    description: "Complete reference implementations of BFS, DFS, Tree traversals, and Dijkstra's routing algorithms.",
-    faculty: "Er. Nishant Kapri (CSE Dept.)",
-    uploadDate: "08 June 2026",
-    fileSize: "7.4 MB"
-  },
-  {
-    id: "5",
-    title: "Wave Optics & Interference",
-    subject: "Physics",
-    description: "Classroom derivations of Young's Double Slit Experiment, Huygens' Principle, and diffraction constraints.",
-    faculty: "Dr. Alok Rai (Physics Dept.)",
-    uploadDate: "05 June 2026",
-    fileSize: "2.9 MB"
-  }
-];
+// const DUMMY_NOTES: NoteItem[] = [
+//   {
+//     id: "1",
+//     title: "Electrostatics & Gauss Law",
+//     subject: "Physics",
+//     description: "Comprehensive class notes covering electric fields, potential, flux, and Gauss law applications.",
+//     faculty: "Dr. Alok Rai (Physics Dept.)",
+//     uploadDate: "15 June 2026",
+//     fileSize: "4.2 MB"
+//   },
+//   {
+//     id: "2",
+//     title: "Organic Chemistry: Unit 2 Reaction Mechanisms",
+//     subject: "Chemistry",
+//     description: "Detailed step-by-step mechanisms for SN1, SN2, E1, and E2 reactions with major exceptions.",
+//     faculty: "Prof. S. Sharma (Chemistry Dept.)",
+//     uploadDate: "12 June 2026",
+//     fileSize: "5.8 MB"
+//   },
+//   {
+//     id: "3",
+//     title: "Differential Equations & Applications",
+//     subject: "Mathematics",
+//     description: "First-order and second-order linear differential equations solved with engineering application modeling.",
+//     faculty: "Dr. Amit Verma (Maths Dept.)",
+//     uploadDate: "10 June 2026",
+//     fileSize: "3.1 MB"
+//   },
+//   {
+//     id: "4",
+//     title: "Data Structures: Binary Trees & Graphs",
+//     subject: "Computer Science",
+//     description: "Complete reference implementations of BFS, DFS, Tree traversals, and Dijkstra's routing algorithms.",
+//     faculty: "Er. Nishant Kapri (CSE Dept.)",
+//     uploadDate: "08 June 2026",
+//     fileSize: "7.4 MB"
+//   },
+//   {
+//     id: "5",
+//     title: "Wave Optics & Interference",
+//     subject: "Physics",
+//     description: "Classroom derivations of Young's Double Slit Experiment, Huygens' Principle, and diffraction constraints.",
+//     faculty: "Dr. Alok Rai (Physics Dept.)",
+//     uploadDate: "05 June 2026",
+//     fileSize: "2.9 MB"
+//   }
+// ];
 
 const FILTER_CHIPS: FilterType[] = ["All", "Physics", "Chemistry", "Mathematics", "Computer Science"];
 
@@ -87,20 +88,48 @@ export default function NotesScreen() {
   // State Management
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedFilter, setSelectedFilter] = useState<FilterType>("All");
-  const [filteredNotes, setFilteredNotes] = useState<NoteItem[]>(DUMMY_NOTES);
+  const [notes, setNotes] = useState<NoteItem[]>([]);
+  const [filteredNotes, setFilteredNotes] = useState<NoteItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Simulate Premium Skeleton Loading State on Component Mount
   useEffect(() => {
-    const timer = setTimeout(() => {
+
+  const fetchNotes = async () => {
+    try {
+
+      const response = await axios.get(
+        "http://192.168.29.49:5000/api/student/notes/3"
+      );
+
+      console.log("NOTES API:", response.data);
+
+      setNotes(response.data.notes);
+      setFilteredNotes(response.data.notes);
+
+    } catch (error) {
+
+      console.log("Notes Fetch Error:", error);
+
+      Alert.alert(
+        "Error",
+        "Failed to load notes"
+      );
+
+    } finally {
+
       setIsLoading(false);
-    }, 1200); // 1.2 Seconds smooth simulation block
-    return () => clearTimeout(timer);
-  }, []);
+
+    }
+  };
+
+  fetchNotes();
+
+}, []);
 
   // Sync Search & Filter Engine Matrix
   useEffect(() => {
-    let result = DUMMY_NOTES;
+    let result = notes;
 
     // Filter Logic
     if (selectedFilter !== "All") {
@@ -328,7 +357,7 @@ export default function NotesScreen() {
         // Actual Document Feed Rendering
         <FlatList
           data={filteredNotes}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           renderItem={renderNoteCard}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}

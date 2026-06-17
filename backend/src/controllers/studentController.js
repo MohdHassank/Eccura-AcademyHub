@@ -36,6 +36,37 @@ const getDashboard = async (req, res) => {
   }
 };
 
+const getNotes = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const request = new sql.Request();
+
+    const result = await request
+      .input("StudentId", sql.Int, id)
+      .query(`
+        SELECT *
+        FROM Notes
+        WHERE studentId = @StudentId
+        ORDER BY id DESC
+      `);
+
+    return res.status(200).json({
+      success: true,
+      notes: result.recordset
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
 module.exports = {
-  getDashboard
+  getDashboard,
+  getNotes
 };
