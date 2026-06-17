@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
     StyleSheet,
@@ -18,71 +19,71 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 // ================= TYPESCRIPT INTERFACES =================
 interface AssignmentItem {
-    id: string;
+    id: number;
+    studentId: number;
     title: string;
-    subject: "Physics" | "Chemistry" | "Mathematics" | "Computer Science";
-    topic: string;
+    subject: string;
+    description: string;
     faculty: string;
     dueDate: string;
-    status: "Pending" | "Submitted";
-    marksWeightage: string;
+    status: string;
 }
 
 type TabType = "Pending" | "Submitted";
 
 // ================= DUMMY ACADEMIC DATA =================
-const DUMMY_ASSIGNMENTS: AssignmentItem[] = [
-    {
-        id: "a1",
-        title: "Gauss Law & Electric Potential Problems",
-        subject: "Physics",
-        topic: "Electrostatics Tutorial 2",
-        faculty: "Dr. Alok Rai",
-        dueDate: "24 June 2026",
-        status: "Pending",
-        marksWeightage: "10% of Internal Assessment"
-    },
-    {
-        id: "a2",
-        title: "Mechanism of Nucleophilic Substitution",
-        subject: "Chemistry",
-        topic: "Organic Chemistry Sheet 1",
-        faculty: "Prof. S. Sharma",
-        dueDate: "20 June 2026",
-        status: "Pending",
-        marksWeightage: "5% of Internal Assessment"
-    },
-    {
-        id: "a3",
-        title: "Fourier Series & Periodic Functions Expansion",
-        subject: "Mathematics",
-        topic: "Advanced Calculus Assignment",
-        faculty: "Dr. Amit Verma",
-        dueDate: "28 June 2026",
-        status: "Pending",
-        marksWeightage: "15% of Internal Assessment"
-    },
-    {
-        id: "a4",
-        title: "Stack & Queue Implementation in C++",
-        subject: "Computer Science",
-        topic: "Data Structures Lab Practical 3",
-        faculty: "Er. Nishant Kapri",
-        dueDate: "14 June 2026",
-        status: "Submitted",
-        marksWeightage: "Grade A Awarded"
-    },
-    {
-        id: "a5",
-        title: "Dijkstra's Shortest Path Matrix Optimization",
-        subject: "Computer Science",
-        topic: "Algorithm Analysis Task 1",
-        faculty: "Er. Nishant Kapri",
-        dueDate: "11 June 2026",
-        status: "Submitted",
-        marksWeightage: "Grade A+ Awarded"
-    }
-];
+// const DUMMY_ASSIGNMENTS: AssignmentItem[] = [
+//     {
+//         id: "a1",
+//         title: "Gauss Law & Electric Potential Problems",
+//         subject: "Physics",
+//         topic: "Electrostatics Tutorial 2",
+//         faculty: "Dr. Alok Rai",
+//         dueDate: "24 June 2026",
+//         status: "Pending",
+//         marksWeightage: "10% of Internal Assessment"
+//     },
+//     {
+//         id: "a2",
+//         title: "Mechanism of Nucleophilic Substitution",
+//         subject: "Chemistry",
+//         topic: "Organic Chemistry Sheet 1",
+//         faculty: "Prof. S. Sharma",
+//         dueDate: "20 June 2026",
+//         status: "Pending",
+//         marksWeightage: "5% of Internal Assessment"
+//     },
+//     {
+//         id: "a3",
+//         title: "Fourier Series & Periodic Functions Expansion",
+//         subject: "Mathematics",
+//         topic: "Advanced Calculus Assignment",
+//         faculty: "Dr. Amit Verma",
+//         dueDate: "28 June 2026",
+//         status: "Pending",
+//         marksWeightage: "15% of Internal Assessment"
+//     },
+//     {
+//         id: "a4",
+//         title: "Stack & Queue Implementation in C++",
+//         subject: "Computer Science",
+//         topic: "Data Structures Lab Practical 3",
+//         faculty: "Er. Nishant Kapri",
+//         dueDate: "14 June 2026",
+//         status: "Submitted",
+//         marksWeightage: "Grade A Awarded"
+//     },
+//     {
+//         id: "a5",
+//         title: "Dijkstra's Shortest Path Matrix Optimization",
+//         subject: "Computer Science",
+//         topic: "Algorithm Analysis Task 1",
+//         faculty: "Er. Nishant Kapri",
+//         dueDate: "11 June 2026",
+//         status: "Submitted",
+//         marksWeightage: "Grade A+ Awarded"
+//     }
+// ];
 
 export default function AssignmentsScreen() {
     const router = useRouter();
@@ -90,21 +91,53 @@ export default function AssignmentsScreen() {
     // State Management
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [activeTab, setActiveTab] = useState<TabType>("Pending");
-    const [filteredData, setFilteredData] = useState<AssignmentItem[]>(DUMMY_ASSIGNMENTS);
+    const [assignments, setAssignments] = useState<AssignmentItem[]>([]);
+    const [filteredData, setFilteredData] = useState<AssignmentItem[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     // Simulate Premium Skeleton Loading State
     useEffect(() => {
-        setIsLoading(true);
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 800); // Quick smooth layout render block
-        return () => clearTimeout(timer);
-    }, [activeTab]);
+
+        const fetchAssignments = async () => {
+
+            try {
+
+                const response = await axios.get(
+                    "http://192.168.29.49:5000/api/student/assignments/3"
+                );
+
+                console.log(
+                    "ASSIGNMENTS API:",
+                    response.data
+                );
+
+                setAssignments(
+                    response.data.assignments
+                );
+
+
+
+            } catch (error) {
+
+                console.log(
+                    "Assignment Error:",
+                    error
+                );
+
+            } finally {
+
+                setIsLoading(false);
+
+            }
+        };
+
+        fetchAssignments();
+
+    }, []);
 
     // Sync Search & Tab filtering logic matrix
     useEffect(() => {
-        let result = DUMMY_ASSIGNMENTS.filter((item) => item.status === activeTab);
+        let result = assignments.filter((item) => item.status === activeTab);
 
         if (searchQuery.trim() !== "") {
             const query = searchQuery.toLowerCase();
@@ -112,12 +145,12 @@ export default function AssignmentsScreen() {
                 (item) =>
                     item.title.toLowerCase().includes(query) ||
                     item.subject.toLowerCase().includes(query) ||
-                    item.topic.toLowerCase().includes(query)
+                    item.description.toLowerCase().includes(query)
             );
         }
 
         setFilteredData(result);
-    }, [searchQuery, activeTab]);
+    }, [searchQuery, activeTab, assignments]);
 
     const handleSubmitAction = (title: string) => {
         Alert.alert(
@@ -174,12 +207,16 @@ export default function AssignmentsScreen() {
                         <FontAwesome5 name={meta.icon} size={10} color={meta.text} style={{ marginRight: 6 }} />
                         <Text style={[styles.badgeText, { color: meta.text }]}>{item.subject}</Text>
                     </View>
-                    <Text style={styles.weightageText}>{item.marksWeightage}</Text>
+                    <Text style={styles.weightageText}>
+                        {item.status}
+                    </Text>
                 </View>
 
                 {/* Primary Text Content details */}
                 <Text style={styles.assignmentTitle}>{item.title}</Text>
-                <Text style={styles.assignmentTopic}>Topic: {item.topic}</Text>
+                <Text style={styles.assignmentTopic}>
+                    {item.description}
+                </Text>
 
                 <View style={styles.metaInfoRow}>
                     <View style={styles.metaSubItem}>
@@ -267,7 +304,11 @@ export default function AssignmentsScreen() {
                         activeOpacity={0.9}
                     >
                         <Text style={[styles.tabButtonText, activeTab === "Submitted" && styles.activeTabButtonText]}>
-                            Submitted ({DUMMY_ASSIGNMENTS.filter(a => a.status === "Submitted").length})
+                            Submitted (
+                            {assignments.filter(
+                                a => a.status === "Submitted"
+                            ).length}
+                            )
                         </Text>
                     </TouchableOpacity> {/* 👈 Sahi tag close kiya */}
 
@@ -311,7 +352,9 @@ export default function AssignmentsScreen() {
             ) : (
                 <FlatList
                     data={filteredData}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item) =>
+                        item.id.toString()
+                    }
                     renderItem={renderAssignmentCard}
                     contentContainerStyle={styles.listContainer}
                     showsVerticalScrollIndicator={false}

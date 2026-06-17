@@ -11,79 +11,80 @@ import {
   StatusBar,
   Alert
 } from "react-native";
+import axios from "axios";
 import { Feather, FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
 // ================= TYPESCRIPT INTERFACES =================
 interface PaperItem {
-  id: string;
+  id: number;
+  studentId: number;
   title: string;
-  subject: "Physics" | "Chemistry" | "Mathematics" | "Computer Science";
-  examType: "Mid-Sem" | "End-Sem";
-  year: "2025" | "2024" | "2023";
-  duration: string;
-  totalMarks: string;
+  subject: string;
+  year: number;
+  faculty: string;
+  fileSize: string;
 }
 
 type YearFilterType = "All Years" | "2025" | "2024" | "2023";
 
 // ================= DUMMY PYQ DATA =================
-const DUMMY_PAPERS: PaperItem[] = [
-  {
-    id: "p1",
-    title: "Quantum Mechanics & Wave Theory Paper",
-    subject: "Physics",
-    examType: "End-Sem",
-    year: "2025",
-    duration: "3 Hours",
-    totalMarks: "100 Marks"
-  },
-  {
-    id: "p2",
-    title: "Organic Chemistry & Polymers Foundations",
-    subject: "Chemistry",
-    examType: "Mid-Sem",
-    year: "2025",
-    duration: "1.5 Hours",
-    totalMarks: "50 Marks"
-  },
-  {
-    id: "p3",
-    title: "Linear Algebra & Vector Calculus Matrix",
-    subject: "Mathematics",
-    examType: "End-Sem",
-    year: "2024",
-    duration: "3 Hours",
-    totalMarks: "100 Marks"
-  },
-  {
-    id: "p4",
-    title: "Object Oriented Programming using C++",
-    subject: "Computer Science",
-    examType: "End-Sem",
-    year: "2024",
-    duration: "3 Hours",
-    totalMarks: "100 Marks"
-  },
-  {
-    id: "p5",
-    title: "Discrete Mathematical Structures & Logic",
-    subject: "Mathematics",
-    examType: "Mid-Sem",
-    year: "2023",
-    duration: "1.5 Hours",
-    totalMarks: "50 Marks"
-  },
-  {
-    id: "p6",
-    title: "Classical Mechanics & Thermodynamics",
-    subject: "Physics",
-    examType: "Mid-Sem",
-    year: "2023",
-    duration: "1.5 Hours",
-    totalMarks: "50 Marks"
-  }
-];
+// const DUMMY_PAPERS: PaperItem[] = [
+//   {
+//     id: "p1",
+//     title: "Quantum Mechanics & Wave Theory Paper",
+//     subject: "Physics",
+//     examType: "End-Sem",
+//     year: "2025",
+//     duration: "3 Hours",
+//     totalMarks: "100 Marks"
+//   },
+//   {
+//     id: "p2",
+//     title: "Organic Chemistry & Polymers Foundations",
+//     subject: "Chemistry",
+//     examType: "Mid-Sem",
+//     year: "2025",
+//     duration: "1.5 Hours",
+//     totalMarks: "50 Marks"
+//   },
+//   {
+//     id: "p3",
+//     title: "Linear Algebra & Vector Calculus Matrix",
+//     subject: "Mathematics",
+//     examType: "End-Sem",
+//     year: "2024",
+//     duration: "3 Hours",
+//     totalMarks: "100 Marks"
+//   },
+//   {
+//     id: "p4",
+//     title: "Object Oriented Programming using C++",
+//     subject: "Computer Science",
+//     examType: "End-Sem",
+//     year: "2024",
+//     duration: "3 Hours",
+//     totalMarks: "100 Marks"
+//   },
+//   {
+//     id: "p5",
+//     title: "Discrete Mathematical Structures & Logic",
+//     subject: "Mathematics",
+//     examType: "Mid-Sem",
+//     year: "2023",
+//     duration: "1.5 Hours",
+//     totalMarks: "50 Marks"
+//   },
+//   {
+//     id: "p6",
+//     title: "Classical Mechanics & Thermodynamics",
+//     subject: "Physics",
+//     examType: "Mid-Sem",
+//     year: "2023",
+//     duration: "1.5 Hours",
+//     totalMarks: "50 Marks"
+//   }
+// ];
 
 const YEAR_CHIPS: YearFilterType[] = ["All Years", "2025", "2024", "2023"];
 
@@ -93,25 +94,50 @@ export default function OldPapersScreen() {
   // State Management
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedYear, setSelectedYear] = useState<YearFilterType>("All Years");
-  const [filteredPapers, setFilteredPapers] = useState<PaperItem[]>(DUMMY_PAPERS);
+  const [papers, setPapers] = useState<PaperItem[]>([]);
+const [filteredPapers, setFilteredPapers] = useState<PaperItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Simulate Premium Skeleton Loading State
-  useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
+useEffect(() => {
+  const fetchPapers = async () => {
+    try {
+
+      const response = await axios.get(
+        "http://192.168.29.49:5000/api/student/previousPapers/3"
+      );
+
+      console.log(
+        "PAPERS API:",
+        response.data
+      );
+
+      setPapers(response.data.papers);
+
+    } catch (error) {
+
+      console.log(
+        "Papers Error:",
+        error
+      );
+
+    } finally {
+
       setIsLoading(false);
-    }, 700); // Super snappy transition
-    return () => clearTimeout(timer);
-  }, [selectedYear]);
+
+    }
+  };
+
+  fetchPapers();
+}, []);
 
   // Sync Search & Year Chips Matrix
   useEffect(() => {
-    let result = DUMMY_PAPERS;
+    let result = papers;
 
     // Year Filter Logic
     if (selectedYear !== "All Years") {
-      result = result.filter((paper) => paper.year === selectedYear);
+      result = result.filter((paper) => paper.year.toString() === selectedYear);
     }
 
     // Search Query Matrix
@@ -121,12 +147,12 @@ export default function OldPapersScreen() {
         (paper) =>
           paper.title.toLowerCase().includes(query) ||
           paper.subject.toLowerCase().includes(query) ||
-          paper.examType.toLowerCase().includes(query)
+          paper.faculty.toLowerCase().includes(query)
       );
     }
 
     setFilteredPapers(result);
-  }, [searchQuery, selectedYear]);
+  }, [searchQuery, selectedYear, papers]);
 
   const handleDownloadPaper = (title: string) => {
     Alert.alert("Downloading PYQ 📥", `Fetching question paper and official answer key blueprints for:\n"${title}"`);
@@ -169,7 +195,7 @@ export default function OldPapersScreen() {
   // ================= MAIN REAL CARD RENDER =================
   const renderPaperCard = ({ item }: { item: PaperItem }) => {
     const meta = getSubjectMeta(item.subject);
-    const isEndSem = item.examType === "End-Sem";
+    const isEndSem = true; // Assuming all papers are End-Sem for this example, adjust as needed
 
     return (
       <View style={styles.paperCard}>
@@ -183,7 +209,7 @@ export default function OldPapersScreen() {
           {/* Exam Type Badge */}
           <View style={[styles.examTypeBadge, { backgroundColor: isEndSem ? "#FEF2F2" : "#F0FDF4" }]}>
             <Text style={[styles.examTypeText, { color: isEndSem ? "#EF4444" : "#16A34A" }]}>
-              {item.examType}
+              {item.year}
             </Text>
           </View>
         </View>
@@ -197,11 +223,11 @@ export default function OldPapersScreen() {
         <View style={styles.statsRow}>
           <View style={styles.statTag}>
             <Feather name="clock" size={12} color="#64748B" style={{ marginRight: 4 }} />
-            <Text style={styles.statTagText}>{item.duration}</Text>
+            <Text style={styles.statTagText}>{item.faculty}</Text>
           </View>
           <View style={styles.statTag}>
             <Feather name="award" size={12} color="#64748B" style={{ marginRight: 4 }} />
-            <Text style={styles.statTagText}>{item.totalMarks}</Text>
+            <Text style={styles.statTagText}>{item.fileSize}</Text>
           </View>
           <View style={[styles.statTag, { backgroundColor: "#F1F5F9" }]}>
             <Text style={[styles.statTagText, { color: "#1E293B", fontWeight: "700" }]}>Year: {item.year}</Text>
@@ -314,7 +340,7 @@ export default function OldPapersScreen() {
       ) : (
         <FlatList
           data={filteredPapers}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           renderItem={renderPaperCard}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}

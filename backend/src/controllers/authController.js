@@ -32,7 +32,7 @@ const signup = async (req, res) => {
     // Agar koi record milta hai, iska matlab duplicate data hai
     if (checkResult.recordset.length > 0) {
       const existingUser = checkResult.recordset[0];
-      
+
       // Strict lower case comparison checks for duplicate email
       if (existingUser.email.toLowerCase() === email.toLowerCase()) {
         return res.status(400).json({
@@ -40,7 +40,7 @@ const signup = async (req, res) => {
           message: "Conflict: This email is already registered.",
         });
       }
-      
+
       if (existingUser.phone === phone) {
         return res.status(400).json({
           success: false,
@@ -142,12 +142,12 @@ const login = async (req, res) => {
       success: true,
       message: "Authentication successful! Welcome back 🎉",
       user: {
-  id: user.id,
-  fullName: user.fullName,
-  email: user.email,
-  phone: user.phone,
-  role: user.role
-}
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone,
+        role: user.role
+      }
     });
 
   } catch (error) {

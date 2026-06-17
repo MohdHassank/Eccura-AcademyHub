@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView } from "react-native-safe-area-context";
+import axios from "axios";
 import {
   StyleSheet,
   Text,
@@ -16,96 +18,138 @@ import { useRouter } from "expo-router";
 
 // ================= TYPESCRIPT INTERFACES =================
 interface LectureItem {
-  id: string;
+  id: number;
+  studentId: number;
   title: string;
-  subject: "Physics" | "Chemistry" | "Mathematics" | "Computer Science";
-  professor: string;
+  subject: string;
+  faculty: string;
   duration: string;
-  uploadedDate: string;
-  views: string;
-  chaptersCount: number;
+  uploadDate: string;
+  thumbnailUrl: string;
 }
 
 type SubjectFilterType = "All" | "Physics" | "Chemistry" | "Mathematics" | "Computer Science";
 
 // ================= DUMMY LECTURES DATA =================
-const DUMMY_LECTURES: LectureItem[] = [
-  {
-    id: "l1",
-    title: "Introduction to Semiconductor Physics & Diode Characteristics",
-    subject: "Physics",
-    professor: "Dr. Alok Rai",
-    duration: "45:20",
-    uploadedDate: "15 June 2026",
-    views: "142 Views",
-    chaptersCount: 4
-  },
-  {
-    id: "l2",
-    title: "Deep Dive into Pointer Arithmetic & Memory Allocation in C++",
-    subject: "Computer Science",
-    professor: "Er. Nishant Kapri",
-    duration: "1:12:05",
-    uploadedDate: "12 June 2026",
-    views: "210 Views",
-    chaptersCount: 6
-  },
-  {
-    id: "l3",
-    title: "Eigenvalues, Eigenvectors & Diagonalization Masterclass",
-    subject: "Mathematics",
-    professor: "Dr. Amit Verma",
-    duration: "58:40",
-    uploadedDate: "10 June 2026",
-    views: "95 Views",
-    chaptersCount: 3
-  },
-  {
-    id: "l4",
-    title: "Chemical Kinetics: Rate Laws & Order of Reactions",
-    subject: "Chemistry",
-    professor: "Prof. S. Sharma",
-    duration: "38:15",
-    uploadedDate: "08 June 2026",
-    views: "88 Views",
-    chaptersCount: 2
-  },
-  {
-    id: "l5",
-    title: "Graph Traversal Algorithms: BFS & DFS Explained Visually",
-    subject: "Computer Science",
-    professor: "Er. Nishant Kapri",
-    duration: "1:05:50",
-    uploadedDate: "05 June 2026",
-    views: "320 Views",
-    chaptersCount: 5
-  }
-];
+// const DUMMY_LECTURES: LectureItem[] = [
+//   {
+//     id: "l1",
+//     title: "Introduction to Semiconductor Physics & Diode Characteristics",
+//     subject: "Physics",
+//     professor: "Dr. Alok Rai",
+//     duration: "45:20",
+//     uploadedDate: "15 June 2026",
+//     views: "142 Views",
+//     chaptersCount: 4
+//   },
+//   {
+//     id: "l2",
+//     title: "Deep Dive into Pointer Arithmetic & Memory Allocation in C++",
+//     subject: "Computer Science",
+//     professor: "Er. Nishant Kapri",
+//     duration: "1:12:05",
+//     uploadedDate: "12 June 2026",
+//     views: "210 Views",
+//     chaptersCount: 6
+//   },
+//   {
+//     id: "l3",
+//     title: "Eigenvalues, Eigenvectors & Diagonalization Masterclass",
+//     subject: "Mathematics",
+//     professor: "Dr. Amit Verma",
+//     duration: "58:40",
+//     uploadedDate: "10 June 2026",
+//     views: "95 Views",
+//     chaptersCount: 3
+//   },
+//   {
+//     id: "l4",
+//     title: "Chemical Kinetics: Rate Laws & Order of Reactions",
+//     subject: "Chemistry",
+//     professor: "Prof. S. Sharma",
+//     duration: "38:15",
+//     uploadedDate: "08 June 2026",
+//     views: "88 Views",
+//     chaptersCount: 2
+//   },
+//   {
+//     id: "l5",
+//     title: "Graph Traversal Algorithms: BFS & DFS Explained Visually",
+//     subject: "Computer Science",
+//     professor: "Er. Nishant Kapri",
+//     duration: "1:05:50",
+//     uploadedDate: "05 June 2026",
+//     views: "320 Views",
+//     chaptersCount: 5
+//   }
+// ];
 
 const SUBJECT_CHIPS: SubjectFilterType[] = ["All", "Physics", "Chemistry", "Mathematics", "Computer Science"];
 
 export default function RecordedLecturesScreen() {
   const router = useRouter();
+  const fetchLectures = async () => {
+    try {
+
+      const userData = await AsyncStorage.getItem("user");
+
+      if (!userData) return;
+
+      const user = JSON.parse(userData);
+
+      const response = await axios.get(
+        `http://192.168.29.49:5000/api/student/recordedLectures/${user.id}`
+      );
+
+      console.log("LECTURES API:", response.data);
+
+      if (response.data.success) {
+        setLectures(response.data.lectures);
+        setFilteredLectures(response.data.lectures);
+      }
+
+    } catch (error) {
+
+      console.log("LECTURES FETCH ERROR:", error);
+
+      Alert.alert(
+        "Error",
+        "Failed to load lectures"
+      );
+
+    }
+  };
 
   // State Management
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedSubject, setSelectedSubject] = useState<SubjectFilterType>("All");
-  const [filteredLectures, setFilteredLectures] = useState<LectureItem[]>(DUMMY_LECTURES);
+  const [lectures, setLectures] =
+    useState<LectureItem[]>([]);
+
+  const [filteredLectures, setFilteredLectures] =
+    useState<LectureItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Simulate Premium Skeleton Loading State
   useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
+
+    const loadData = async () => {
+
+      setIsLoading(true);
+
+      await fetchLectures();
+
       setIsLoading(false);
-    }, 600); // Ultra fast rendering response
-    return () => clearTimeout(timer);
-  }, [selectedSubject]);
+
+    };
+
+    loadData();
+
+  }, []);
 
   // Sync Filter Matrices
   useEffect(() => {
-    let result = DUMMY_LECTURES;
-
+    let result = lectures;
     if (selectedSubject !== "All") {
       result = result.filter((lecture) => lecture.subject === selectedSubject);
     }
@@ -115,7 +159,7 @@ export default function RecordedLecturesScreen() {
       result = result.filter(
         (lecture) =>
           lecture.title.toLowerCase().includes(query) ||
-          lecture.professor.toLowerCase().includes(query)
+          lecture.faculty.toLowerCase().includes(query)
       );
     }
 
@@ -160,9 +204,9 @@ export default function RecordedLecturesScreen() {
 
     return (
       <View style={styles.lectureCard}>
-        
+
         {/* Interactive Thumbnail Component Area */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.videoThumbnailWrapper, { backgroundColor: meta.thumbColor }]}
           onPress={() => handlePlayVideo(item.title)}
           activeOpacity={0.9}
@@ -191,9 +235,11 @@ export default function RecordedLecturesScreen() {
           </Text>
 
           <View style={styles.metaRow}>
-            <Text style={styles.professorText}>By {item.professor}</Text>
+            <Text style={styles.professorText}>By {item.faculty}</Text>
             <View style={styles.dotSeparator} />
-            <Text style={styles.metaSubText}>{item.chaptersCount} Chapters</Text>
+            <Text style={styles.metaSubText}>
+              {item.duration}
+            </Text>
           </View>
 
           {/* Divider Line */}
@@ -203,12 +249,18 @@ export default function RecordedLecturesScreen() {
           <View style={styles.cardFooter}>
             <View style={styles.statsFlex}>
               <Feather name="eye" size={12} color="#94A3B8" style={{ marginRight: 4 }} />
-              <Text style={styles.footerMetricText}>{item.views}</Text>
+              <Text style={styles.footerMetricText}>
+                {item.duration}
+              </Text>
+
               <View style={styles.dotSeparator} />
-              <Text style={styles.footerMetricText}>{item.uploadedDate}</Text>
+
+              <Text style={styles.footerMetricText}>
+                {new Date(item.uploadDate).toLocaleDateString()}
+              </Text>
             </View>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.downloadActionBtn}
               onPress={() => handleDownloadVideo(item.title)}
               activeOpacity={0.7}
@@ -298,7 +350,7 @@ export default function RecordedLecturesScreen() {
       ) : (
         <FlatList
           data={filteredLectures}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           renderItem={renderLectureCard}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}

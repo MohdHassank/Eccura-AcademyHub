@@ -37,12 +37,12 @@ export default function AcademicsScreen() {
     },
     {
       id: "3",
-      title: "Old Papers",
+      title: "Previous Papers",
       desc: "Practice with previous years' question papers.",
       icon: "book-open",
       color: "#F59E0B", // Amber Orange
       bgColor: "#FEF3C7",
-      route: "/old-papers", // 👈 Old Papers screen ka path link kiya
+      route: "/previousPapers", // 👈 Old Papers screen ka path link kiya
     },
     {
       id: "4",
