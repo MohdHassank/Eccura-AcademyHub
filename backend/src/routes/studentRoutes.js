@@ -21,6 +21,14 @@ router.get(
   "/testResults/:id",
   studentController.getTestResults
 );
+router.get(
+  "/notices/:id",
+  studentController.getNotices
+);
 
+router.get(
+  "/announcements/:id",
+  studentController.getAnnouncements
+);
 
 module.exports = router;

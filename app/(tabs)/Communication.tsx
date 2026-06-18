@@ -18,52 +18,31 @@ import {
   Feather, 
   MaterialIcons 
 } from '@expo/vector-icons';
-import { router, useRouter } from 'expo-router';
+import { router } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 
 export default function CommunicationScreen() {
 
-useFocusEffect(
-  useCallback(() => {
-    const onBackPress = () => {
-      router.replace("/(tabs)/home");
-      return true;
-    };
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        router.replace("/(tabs)/home");
+        return true;
+      };
 
-    const subscription = BackHandler.addEventListener(
-      "hardwareBackPress",
-      onBackPress
-    );
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
 
-    return () => subscription.remove();
-  }, [])
-);
+      return () => subscription.remove();
+    }, [])
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* 1. TOP NAVBAR HEADER */}
-      
-      {/* <View style={styles.header}>
-        <TouchableOpacity style={styles.iconButton}>
-          <Feather name="menu" size={22} color="#1E293B" />
-        </TouchableOpacity>
-        
-        <View style={styles.logoContainer}>
-          <View style={styles.logoRow}>
-            <MaterialCommunityIcons name="triangle" size={24} color="#00A3FF" style={styles.logoIcon} />
-            <Text style={styles.logoTextMain}>Academy<Text style={styles.logoTextSub}>Hub</Text></Text>
-          </View>
-          <Text style={styles.logoTagline}>Learn. Grow. Succeed.</Text>
-        </View>
-
-        <TouchableOpacity style={styles.iconButton}>
-          <Ionicons name="notifications-outline" size={22} color="#1E293B" />
-          <View style={styles.badge}><Text style={styles.badgeText}>3</Text></View>
-        </TouchableOpacity>
-      </View> */}
-
       <ScrollView 
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -74,35 +53,45 @@ useFocusEffect(
           <Text style={styles.pageSubtitle}>One place for everything that keeps you connected.</Text>
         </View>
 
-        {/* 3. HORIZONTAL STATS ROW (Notices, Announcements, Replies, Doubts) */}
+        {/* 3. HORIZONTAL STATS ROW (Linked to Respective Screens) */}
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false} 
           style={styles.statsRow}
           contentContainerStyle={styles.statsRowContent}
         >
-          <TouchableOpacity style={styles.statPill}>
+          {/* Linked to Notices */}
+          <TouchableOpacity 
+            style={styles.statPill} 
+            onPress={() => router.push('/notices')}
+            activeOpacity={0.7}
+          >
             <View style={[styles.statIconWrapper, { backgroundColor: '#EFF6FF' }]}><MaterialIcons name="description" size={18} color="#2563EB" /></View>
             <View><Text style={styles.statNum}>05</Text><Text style={styles.statLabel}>New Notices</Text></View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.statPill}>
-            <View style={[styles.statIconWrapper, { backgroundColor: '#ECFDF5' }]}><Ionicons name="megaphone-outline" size={18} color="#10B981" /></View>
+          {/* Linked to Announcements */}
+          <TouchableOpacity 
+            style={styles.statPill} 
+            onPress={() => router.push('/annoucements')}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.statIconWrapper, { backgroundColor: '#E6F4EA' }]}><Ionicons name="megaphone-outline" size={18} color="#137333" /></View>
             <View><Text style={styles.statNum}>03</Text><Text style={styles.statLabel}>Announcements</Text></View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.statPill}>
+          <TouchableOpacity style={styles.statPill} activeOpacity={0.7}>
             <View style={[styles.statIconWrapper, { backgroundColor: '#F5F3FF' }]}><MaterialCommunityIcons name="message-reply-text-outline" size={18} color="#8B5CF6" /></View>
             <View><Text style={styles.statNum}>02</Text><Text style={styles.statLabel}>Teacher Replies</Text></View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.statPill}>
+          <TouchableOpacity style={styles.statPill} activeOpacity={0.7}>
             <View style={[styles.statIconWrapper, { backgroundColor: '#FFF7ED' }]}><Feather name="help-circle" size={18} color="#F97316" /></View>
             <View><Text style={styles.statNum}>1</Text><Text style={styles.statLabel}>Doubts Pending</Text></View>
           </TouchableOpacity>
         </ScrollView>
 
-        {/* 4. TWO-COLUMN SPLIT GRID (Notices & Announcements) */}
+        {/* 4. TWO-COLUMN SPLIT GRID (Notices & Announcements Screens Navigation Anchors) */}
         <View style={styles.gridContainer}>
           {/* Left Card: Notices */}
           <View style={styles.halfCard}>
@@ -117,7 +106,11 @@ useFocusEffect(
               </View>
             </View>
 
-            <TouchableOpacity style={styles.textActionButton}>
+            <TouchableOpacity 
+              style={styles.textActionButton} 
+              onPress={() => router.push('/notices')}
+              activeOpacity={0.7}
+            >
               <Text style={[styles.textActionBtnText, { color: '#2563EB' }]}>View All Notices</Text>
               <Feather name="arrow-right" size={14} color="#2563EB" />
             </TouchableOpacity>
@@ -125,19 +118,23 @@ useFocusEffect(
 
           {/* Right Card: Announcements */}
           <View style={styles.halfCard}>
-            <Text style={styles.cardMainTitle}>Announcements</Text>
+            <Text style={[styles.cardMainTitle, { color: '#137333' }]}>Announcements</Text>
             <Text style={styles.cardSubTitle}>Important updates and news for all students.</Text>
             
             {/* Visual Placeholder Graphic simulation */}
             <View style={styles.cardGraphicCenter}>
               <View style={[styles.docGraphicBase, { borderColor: '#E6F4EA' }]}>
-                <Ionicons name="megaphone" size={40} color="#10B981" />
+                <Ionicons name="megaphone" size={40} color="#137333" />
               </View>
             </View>
 
-            <TouchableOpacity style={[styles.textActionButton, { backgroundColor: '#E6F4EA' }]}>
-              <Text style={[styles.textActionBtnText, { color: '#10B981' }]}>Explore Now</Text>
-              <Feather name="arrow-right" size={14} color="#10B981" />
+            <TouchableOpacity 
+              style={[styles.textActionButton, { backgroundColor: '#E6F4EA' }]} 
+              onPress={() => router.push('/annoucements')}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.textActionBtnText, { color: '#137333' }]}>Explore Now</Text>
+              <Feather name="arrow-right" size={14} color="#137333" />
             </TouchableOpacity>
           </View>
         </View>
@@ -162,7 +159,11 @@ useFocusEffect(
               <Text style={styles.typingIndicator}>●● typing...</Text>
             </View>
 
-            <TouchableOpacity style={[styles.textActionButton, { backgroundColor: '#F3E8FF' }]}>
+            <TouchableOpacity
+              style={[styles.textActionButton, { backgroundColor: '#F3E8FF' }]}
+              onPress={() => router.push('/teacher-chat')}
+              activeOpacity={0.7}
+            >
               <Text style={[styles.textActionBtnText, { color: '#6D28D9' }]}>Start Conversation</Text>
               <Feather name="arrow-right" size={14} color="#6D28D9" />
             </TouchableOpacity>
@@ -181,7 +182,10 @@ useFocusEffect(
               </View>
             </View>
 
-            <TouchableOpacity style={[styles.textActionButton, { backgroundColor: '#FFEDD5' }]}>
+
+            <TouchableOpacity style={[styles.textActionButton, { backgroundColor: '#FFEDD5' }]} 
+            onPress={() => router.push('/doubt-support')}
+            activeOpacity={0.7}>
               <Text style={[styles.textActionBtnText, { color: '#C2410C' }]}>Ask a Doubt</Text>
               <Feather name="arrow-right" size={14} color="#C2410C" />
             </TouchableOpacity>
@@ -189,7 +193,6 @@ useFocusEffect(
         </View>
 
         {/* 6. FULL WIDTH CARD: CLASS UPDATES */}
-        
         <View style={styles.fullCard}>
           <Text style={styles.cardMainTitle}>Class Updates</Text>
           <Text style={styles.cardSubTitle}>Stay updated with class schedules, materials, and reminders.</Text>
@@ -226,7 +229,10 @@ useFocusEffect(
             </View>
           </View>
 
-          <TouchableOpacity style={[styles.textActionButton, { backgroundColor: '#EFF6FF', alignSelf: 'flex-start', paddingHorizontal: 16 }]}>
+          <TouchableOpacity 
+            style={[styles.textActionButton, { backgroundColor: '#EFF6FF', alignSelf: 'flex-start', paddingHorizontal: 16 }]}
+            activeOpacity={0.7}
+          >
             <Text style={[styles.textActionBtnText, { color: '#2563EB' }]}>Check Updates</Text>
             <Feather name="arrow-right" size={14} color="#2563EB" />
           </TouchableOpacity>
@@ -318,7 +324,7 @@ const styles = StyleSheet.create({
     color: '#0F172A',
   },
   logoTextSub: {
-    color: '#10B981',
+    color: '#137333',
   },
   logoTagline: {
     fontSize: 10,

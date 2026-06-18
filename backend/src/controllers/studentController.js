@@ -315,6 +315,68 @@ const getTestResults = async (req, res) => {
   }
 };
 
+const getNotices = async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    const request = new sql.Request();
+
+    const result = await request
+      .input("StudentId", sql.Int, id)
+      .query(`
+        SELECT *
+        FROM Notices
+        WHERE studentId = @StudentId
+        ORDER BY noticeDate DESC
+      `);
+
+    return res.status(200).json({
+      success: true,
+      notices: result.recordset
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
+
+const getAnnouncements = async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    const request = new sql.Request();
+
+    const result = await request
+      .input("StudentId", sql.Int, id)
+      .query(`
+        SELECT *
+        FROM Announcements
+        WHERE studentId = @StudentId
+        ORDER BY announcementDate DESC
+      `);
+
+    return res.status(200).json({
+      success: true,
+      announcements: result.recordset
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
+
 module.exports = {
     getDashboard,
     getNotes,
@@ -325,5 +387,7 @@ module.exports = {
     getNotifications,
     getQuizTests,
     getMockTests,
-    getTestResults
+    getTestResults,
+    getNotices,
+    getAnnouncements
 };
