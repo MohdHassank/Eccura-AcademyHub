@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
@@ -22,11 +22,28 @@ import {
   View,
   Modal,
   TextInput,
+  BackHandler,
 } from "react-native";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function ProfileScreen() {
+
+useFocusEffect(
+  useCallback(() => {
+    const onBackPress = () => {
+      router.replace("/(tabs)/home");
+      return true;
+    };
+
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress
+    );
+
+    return () => subscription.remove();
+  }, [])
+);
 
   const router = useRouter();
 
@@ -140,7 +157,7 @@ const handleProfileUpdate = async () => {
 
       {/* ================= HEADER CUSTOM ================= */}
       <View style={styles.headerRow}>
-        <TouchableOpacity style={styles.backButton}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Feather name="chevron-left" size={24} color="#1E293B" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Profile</Text>

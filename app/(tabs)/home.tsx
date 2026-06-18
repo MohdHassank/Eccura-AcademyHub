@@ -8,7 +8,9 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import { BackHandler } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   Dimensions,
   Image,
@@ -29,6 +31,20 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function HomePage() {
   const router = useRouter();
+  useFocusEffect(
+  useCallback(() => {
+    const onBackPress = () => {
+      return true;
+    };
+
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress
+    );
+
+    return () => subscription.remove();
+  }, [])
+);
   // Active states for original home sections
   const [activeTestTab, setActiveTestTab] = useState("Upcoming");
   const [user, setUser] = useState<any>(null);
@@ -132,6 +148,8 @@ export default function HomePage() {
     loadDashboard();
     fetchNotifications();
   }, []);
+
+  
 
   const loadDashboard = async () => {
     try {

@@ -108,7 +108,7 @@ export default function TestPracticeFinalScreen() {
         <TouchableOpacity style={styles.headerBackButton} onPress={() => router.back()} activeOpacity={0.7}>
           <Ionicons name="arrow-back" size={22} color="#1E293B" />
         </TouchableOpacity>
-        <Text style={styles.topHeaderTitle}>Practice Engine</Text>
+        {/* <Text style={styles.topHeaderTitle}>Practice Engine</Text> */}
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>

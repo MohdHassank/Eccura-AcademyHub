@@ -94,6 +94,15 @@ export default function AcademicsScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
         
         {/* ================= HERO TEXT & ILLUSTRATION HEADER ================= */}
+        
+        
+        <View style={styles.topHeaderNav}>
+                <TouchableOpacity style={styles.headerBackButton} onPress={() => router.back()} activeOpacity={0.7}>
+                  <Ionicons name="arrow-back" size={22} color="#1E293B" />
+                </TouchableOpacity>
+                {/* <Text style={styles.topHeaderTitle}>Practice Engine</Text> */}
+              </View>
+        
         <View style={styles.heroSection}>
           <View style={styles.heroTextContent}>
             <Text style={styles.heroTitle}>Academics</Text>
@@ -159,6 +168,26 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F8FAFC",
+  },
+  topHeaderNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    // paddingTop: ,
+    paddingBottom: 12,
+    backgroundColor: '#FAFBFD',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  headerBackButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   scrollContainer: {
     paddingTop: 30,

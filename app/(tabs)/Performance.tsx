@@ -1,3 +1,5 @@
+import { router, useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   Feather,
   FontAwesome5,
@@ -5,9 +7,9 @@ import {
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
-import React from "react";
+import React, { useCallback } from "react";
 import {
+  BackHandler,
   Dimensions,
   Platform,
   ScrollView,
@@ -16,15 +18,34 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 const isSmallDevice = width < 375;
 
 export default function PerformanceScreen() {
+
+useFocusEffect(
+  useCallback(() => {
+    const onBackPress = () => {
+      router.replace("/(tabs)/home");
+      return true;
+    };
+
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress
+    );
+
+    return () => subscription.remove();
+  }, [])
+);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* HEADER SECTION */}
-      <View style={styles.header}>
+      
+      {/* <View style={styles.header}>
         <TouchableOpacity style={styles.iconButton}>
           <Ionicons name="arrow-back" size={22} color="#1E293B" />
         </TouchableOpacity>
@@ -50,7 +71,7 @@ export default function PerformanceScreen() {
             <Text style={styles.badgeText}>3</Text>
           </View>
         </TouchableOpacity>
-      </View>
+      </View> */}
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -509,7 +530,11 @@ export default function PerformanceScreen() {
                       { backgroundColor: "#FEF3C7" },
                     ]}
                   >
-                    <Feather name="bulb" size={18} color="#D97706" />
+                    <MaterialCommunityIcons
+                      name="lightbulb"
+                      size={18}
+                      color="#D97706"
+                    />
                   </View>
                   <View style={styles.suggestionTextWrapper}>
                     <Text style={styles.suggestionTitle}>

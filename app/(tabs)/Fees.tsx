@@ -1,32 +1,52 @@
-import React, { useState } from 'react';
-import { 
-  StyleSheet, 
-  Text, 
-  View, 
-  ScrollView, 
-  TouchableOpacity, 
-  SafeAreaView, 
+import React, { useCallback, useState } from 'react';
+import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  TouchableOpacity,
   Platform,
-  Dimensions
+  Dimensions,
+  BackHandler
 } from 'react-native';
-import { 
-  Ionicons, 
-  MaterialCommunityIcons, 
-  FontAwesome5, 
-  Feather, 
+import {
+  Ionicons,
+  MaterialCommunityIcons,
+  FontAwesome5,
+  Feather,
   MaterialIcons,
   AntDesign
 } from '@expo/vector-icons';
+import { router, useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 
 export default function FeesScreen() {
+
+useFocusEffect(
+  useCallback(() => {
+    const onBackPress = () => {
+      router.replace("/(tabs)/home");
+      return true;
+    };
+
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress
+    );
+
+    return () => subscription.remove();
+  }, [])
+);
+
   const [showAmount, setShowAmount] = useState(true);
 
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* 1. TOP NAVBAR HEADER */}
-      <View style={styles.header}>
+      {/* <View style={styles.header}>
         <TouchableOpacity style={styles.iconButton}>
           <Feather name="menu" size={22} color="#1E293B" />
         </TouchableOpacity>
@@ -43,9 +63,9 @@ export default function FeesScreen() {
           <Ionicons name="notifications-outline" size={22} color="#1E293B" />
           <View style={styles.badge}><Text style={styles.badgeText}>3</Text></View>
         </TouchableOpacity>
-      </View>
+      </View> */}
 
-      <ScrollView 
+      <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
@@ -123,19 +143,19 @@ export default function FeesScreen() {
         </View>
 
         {/* 6. LIST OF MODULE ACTIONS */}
-        
+
         {/* ACTION 1: PENDING FEES */}
         <TouchableOpacity style={styles.actionCard}>
           <View style={[styles.actionIconWrapper, { backgroundColor: '#FFEDED' }]}>
             <MaterialIcons name="error-outline" size={24} color="#EF4444" />
           </View>
-          
+
           <View style={styles.actionMainContent}>
             <View style={styles.actionTextInfo}>
               <Text style={styles.actionTitle}>Pending Fees</Text>
               <Text style={styles.actionDesc}>View your pending fee details and due dates.</Text>
             </View>
-            
+
             <View style={styles.badgeInfoRow}>
               <View style={styles.badgeSubBlock}>
                 <Text style={styles.badgeSubLabel}>Due Amount</Text>
@@ -156,15 +176,15 @@ export default function FeesScreen() {
         {/* ACTION 2: ONLINE PAYMENT */}
         <TouchableOpacity style={styles.actionCard}>
           <View style={[styles.actionIconWrapper, { backgroundColor: '#E6F4EA' }]}>
-            <AntDesign name="creditcard" size={22} color="#10B981" />
+            <AntDesign name="credit-card" size={22} color="#10B981" />
           </View>
-          
+
           <View style={styles.actionMainContent}>
             <View style={styles.actionTextInfo}>
               <Text style={styles.actionTitle}>Online Payment</Text>
               <Text style={styles.actionDesc}>Pay your fees securely using multiple options.</Text>
             </View>
-            
+
             <View style={[styles.badgeInfoRow, { backgroundColor: '#F8FAFC', paddingVertical: 6 }]}>
               <Text style={styles.quickPayLabel}>Quick Pay:</Text>
               <View style={styles.paymentLogoMockRow}>
@@ -185,13 +205,13 @@ export default function FeesScreen() {
           <View style={[styles.actionIconWrapper, { backgroundColor: '#EFF6FF' }]}>
             <MaterialCommunityIcons name="history" size={24} color="#3B82F6" />
           </View>
-          
+
           <View style={styles.actionMainContent}>
             <View style={styles.actionTextInfo}>
               <Text style={styles.actionTitle}>Payment History</Text>
               <Text style={styles.actionDesc}>Check your past payments and transaction details.</Text>
             </View>
-            
+
             <View style={styles.badgeInfoRow}>
               <View style={styles.badgeSubBlock}>
                 <Text style={styles.badgeSubLabel}>Total Paid</Text>
@@ -214,13 +234,13 @@ export default function FeesScreen() {
           <View style={[styles.actionIconWrapper, { backgroundColor: '#F3E8FF' }]}>
             <Feather name="download" size={22} color="#8B5CF6" />
           </View>
-          
+
           <View style={styles.actionMainContent}>
             <View style={styles.actionTextInfo}>
               <Text style={styles.actionTitle}>Receipts Download</Text>
               <Text style={styles.actionDesc}>Download your fee receipts whenever you need.</Text>
             </View>
-            
+
             <View style={[styles.badgeInfoRow, { justifyContent: 'space-between', backgroundColor: '#F3E8FF', opacity: 0.8 }]}>
               <View>
                 <Text style={styles.fileTitleText}>Receipt_10Apr2025.pdf</Text>
@@ -333,7 +353,7 @@ const styles = StyleSheet.create({
     marginVertical: 14,
   },
   pageTitle: {
-    fontSize: 26,
+    fontSize: 30,
     fontWeight: '800',
     color: '#0F172A',
   },

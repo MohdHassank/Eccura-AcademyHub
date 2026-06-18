@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useCallback } from 'react';
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import { 
   StyleSheet, 
   Text, 
   View, 
   ScrollView, 
   TouchableOpacity, 
-  SafeAreaView, 
   Platform,
-  Dimensions
+  Dimensions,
+  BackHandler
 } from 'react-native';
 import { 
   Ionicons, 
@@ -16,14 +18,34 @@ import {
   Feather, 
   MaterialIcons 
 } from '@expo/vector-icons';
+import { router, useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 
 export default function CommunicationScreen() {
+
+useFocusEffect(
+  useCallback(() => {
+    const onBackPress = () => {
+      router.replace("/(tabs)/home");
+      return true;
+    };
+
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress
+    );
+
+    return () => subscription.remove();
+  }, [])
+);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* 1. TOP NAVBAR HEADER */}
-      <View style={styles.header}>
+      
+      {/* <View style={styles.header}>
         <TouchableOpacity style={styles.iconButton}>
           <Feather name="menu" size={22} color="#1E293B" />
         </TouchableOpacity>
@@ -40,7 +62,7 @@ export default function CommunicationScreen() {
           <Ionicons name="notifications-outline" size={22} color="#1E293B" />
           <View style={styles.badge}><Text style={styles.badgeText}>3</Text></View>
         </TouchableOpacity>
-      </View>
+      </View> */}
 
       <ScrollView 
         showsVerticalScrollIndicator={false}
@@ -167,6 +189,7 @@ export default function CommunicationScreen() {
         </View>
 
         {/* 6. FULL WIDTH CARD: CLASS UPDATES */}
+        
         <View style={styles.fullCard}>
           <Text style={styles.cardMainTitle}>Class Updates</Text>
           <Text style={styles.cardSubTitle}>Stay updated with class schedules, materials, and reminders.</Text>
@@ -213,7 +236,7 @@ export default function CommunicationScreen() {
         <View style={styles.aiBannerBar}>
           <View style={styles.aiLogoRow}>
             <View style={styles.aiSparkCircle}>
-              <MaterialCommunityIcons name="sparkles" size={14} color="#8B5CF6" />
+              <Ionicons name="sparkles" size={14} color="#8B5CF6" />
             </View>
             <View style={styles.aiTextContainer}>
               <Text style={styles.aiMainTitle}>Communication Hub <Text style={styles.aiGradientText}>AI</Text></Text>
