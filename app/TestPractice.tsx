@@ -1,4 +1,5 @@
 import React from 'react';
+import { SafeAreaView } from "react-native-safe-area-context";
 import { 
   StyleSheet, 
   Text, 
@@ -6,31 +7,109 @@ import {
   StatusBar,
   ScrollView, 
   TouchableOpacity, 
-  SafeAreaView, 
-  Dimensions 
+  Dimensions,
+  Alert
 } from 'react-native';
 import { 
   Ionicons, 
   MaterialCommunityIcons, 
   FontAwesome5 
 } from '@expo/vector-icons';
+import { useRouter } from 'expo-router'; // 👈 Expo Router Import kiya
 
 const { width } = Dimensions.get('window');
 const cardWidth = (width - 44) / 2; // Perfect 2-column grid symmetry layout
 
 export default function TestPracticeFinalScreen() {
+  const router = useRouter(); // 👈 Navigation hook initialize kiya
+
   const gridItems = [
-    { id: '1', title: 'Quiz', sub: 'Attempt chapter &\ntopic-wise quizzes', icon: 'file-document-edit-outline', color: '#2563EB', bg: '#EFF6FF', arrowColor: '#2563EB' },
-    { id: '2', title: 'Mock Tests', sub: 'Simulate real exam\nenvironment', icon: 'clipboard-text-outline', color: '#10B981', bg: '#ECFDF5', arrowColor: '#10B981' },
-    { id: '3', title: 'Daily Practice', sub: 'Solve daily questions\n& build consistency', icon: 'comment-question-outline', color: '#EA580C', bg: '#FFF7ED', arrowColor: '#EA580C' },
-    { id: '4', title: 'AI Quiz Practice', sub: 'Get AI-generated quizzes\nbased on weak areas', icon: 'robot-outline', color: '#7C3AED', bg: '#F5F3FF', arrowColor: '#7C3AED', badge: 'New' },
-    { id: '5', title: 'PYQ Section', sub: "Practice previous years'\nquestions", icon: 'file-document-outline', color: '#EC4899', bg: '#FDF2F8', arrowColor: '#EC4899' },
-    { id: '6', title: 'Test Results', sub: 'Analyze performance\n& improve', icon: 'chart-box-outline', color: '#06B6D4', bg: '#F0FDFA', arrowColor: '#06B6D4' },
+    { 
+      id: '1', 
+      title: 'Quiz', 
+      sub: 'Attempt chapter &\ntopic-wise quizzes', 
+      icon: 'file-document-edit-outline', 
+      color: '#2563EB', 
+      bg: '#EFF6FF', 
+      arrowColor: '#2563EB',
+      route: '/quiz' // 👈 Quiz Center Route Link kiya
+    },
+    { 
+      id: '2', 
+      title: 'Mock Tests', 
+      sub: 'Simulate real exam\nenvironment', 
+      icon: 'clipboard-text-outline', 
+      color: '#10B981', 
+      bg: '#ECFDF5', 
+      arrowColor: '#10B981',
+      route: '/mock-tests' // 👈 Mock Tests Route Link kiya
+    },
+    { 
+      id: '3', 
+      title: 'Daily Practice', 
+      sub: 'Solve daily questions\n& build consistency', 
+      icon: 'comment-question-outline', 
+      color: '#EA580C', 
+      bg: '#FFF7ED', 
+      arrowColor: '#EA580C',
+      route: null 
+    },
+    { 
+      id: '4', 
+      title: 'AI Quiz Practice', 
+      sub: 'Get AI-generated quizzes\nbased on weak areas', 
+      icon: 'robot-outline', 
+      color: '#7C3AED', 
+      bg: '#F5F3FF', 
+      arrowColor: '#7C3AED', 
+      badge: 'New',
+      route: null
+    },
+    { 
+      id: '5', 
+      title: 'PYQ Section', 
+      sub: "Practice previous years'\nquestions", 
+      icon: 'file-document-outline', 
+      color: '#EC4899', 
+      bg: '#FDF2F8', 
+      arrowColor: '#EC4899',
+      route: "/previousPapers" // 👈 PYQ Section Route Link kiya
+    },
+    { 
+      id: '6', 
+      title: 'Test Results', 
+      sub: 'Analyze performance\n& improve', 
+      icon: 'chart-box-outline', 
+      color: '#06B6D4', 
+      bg: '#F0FDFA', 
+      arrowColor: '#06B6D4',
+      route: '/test-results' // 👈 Test Results Route Link kiya
+    },
   ];
+
+  // Navigation Logic Handler
+  const handleCardPress = (item: typeof gridItems[0]) => {
+    if (item.route) {
+      router.push(item.route as any); // Dynamic navigation trigger
+    } else {
+      Alert.alert(
+        "Coming Soon 🚀",
+        `Bhai, ${item.title} module abhi dynamic construction mein hai. Agle update mein live ho jayega!`
+      );
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FAFBFD" />
+
+      {/* ================= BACK NAVIGATION HEADER ================= */}
+      <View style={styles.topHeaderNav}>
+        <TouchableOpacity style={styles.headerBackButton} onPress={() => router.back()} activeOpacity={0.7}>
+          <Ionicons name="arrow-back" size={22} color="#1E293B" />
+        </TouchableOpacity>
+        <Text style={styles.topHeaderTitle}>Practice Engine</Text>
+      </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         
@@ -98,7 +177,12 @@ export default function TestPracticeFinalScreen() {
         {/* ================= 2-COLUMN PREMIUM GRID BLOCK ================= */}
         <View style={styles.gridContainer}>
           {gridItems.map((item) => (
-            <TouchableOpacity key={item.id} style={styles.gridCard} activeOpacity={0.8}>
+            <TouchableOpacity 
+              key={item.id} 
+              style={styles.gridCard} 
+              activeOpacity={0.8}
+              onPress={() => handleCardPress(item)} // 👈 Navigation Click Trigger bind kiya
+            >
               {item.badge && (
                 <View style={styles.newAlertBadge}>
                   <Text style={styles.newAlertBadgeText}>{item.badge}</Text>
@@ -176,9 +260,35 @@ const styles = StyleSheet.create({
     flex: 1, 
     backgroundColor: '#FAFBFD' 
   },
+  topHeaderNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 12,
+    backgroundColor: '#FAFBFD',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  headerBackButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  topHeaderTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginLeft: 14,
+  },
   scrollContent: { 
     paddingHorizontal: 16, 
-    paddingTop: 50, // Thoda extra space taaki status bar se crash na kare layout
+    paddingTop: 16, 
     paddingBottom: 32 
   },
   heroSection: { 

@@ -10,7 +10,6 @@ import axios from "axios";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
   Dimensions,
   Image,
   Modal,
@@ -21,7 +20,8 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  Alert,
+  View
 } from "react-native";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -35,7 +35,8 @@ export default function HomePage() {
   const [dashboard, setDashboard] = useState<any>(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<{ title: string }[]>([]);
-  
+  const [showMenu, setShowMenu] = useState(false);
+
 
   // Mock Data sets mirroring the Figma context explicitly
   const quickActions = [
@@ -184,8 +185,11 @@ export default function HomePage() {
 
       {/* ================= SECTION 1: TOP APP BAR ================= */}
       <View style={styles.topAppBar}>
-        <TouchableOpacity style={styles.menuIconButton}>
-          <Feather name="menu" size={22} color="#1E293B" />
+        <TouchableOpacity
+          style={styles.menuIconButton}
+          onPress={() => setShowMenu(true)}
+        >
+          <Feather name="menu" size={24} color="#1E293B" />
         </TouchableOpacity>
 
         <View style={styles.brandContainer}>
@@ -310,7 +314,7 @@ export default function HomePage() {
           <Text style={styles.sectionHeadingText}>Academics</Text>
           <TouchableOpacity
             style={styles.seeAllRowContainer}
-            onPress={() => router.push("/(tabs)/Academics")} // 🔥 Yeh line navigation handle karegi
+            onPress={() => router.push("/Academics")} // 🔥 Yeh line navigation handle karegi
           >
             <Text style={styles.seeAllActionText}>View All</Text>
             <Feather name="chevron-right" size={14} color="#2563EB" />
@@ -336,7 +340,7 @@ export default function HomePage() {
             <Text style={styles.academicCardDesc}>
               Access important notes anytime, anywhere.
             </Text>
-            <TouchableOpacity style={styles.academicCardButton}>
+            <TouchableOpacity style={styles.academicCardButton} onPress={() => router.push("/notes")}>
               <Text style={[styles.academicBtnText, { color: "#6366F1" }]}>
                 View Notes
               </Text>
@@ -358,7 +362,7 @@ export default function HomePage() {
             <Text style={styles.academicCardDesc}>
               Track and submit your assignments.
             </Text>
-            <TouchableOpacity style={styles.academicCardButton}>
+            <TouchableOpacity style={styles.academicCardButton} onPress={() => router.push("/assignment")}>
               <Text style={[styles.academicBtnText, { color: "#10B981" }]}>
                 View Assignments
               </Text>
@@ -380,7 +384,7 @@ export default function HomePage() {
             <Text style={styles.academicCardDesc}>
               Practice with previous years' papers.
             </Text>
-            <TouchableOpacity style={styles.academicCardButton}>
+            <TouchableOpacity style={styles.academicCardButton} onPress={() => router.push("/previousPapers")}>
               <Text style={[styles.academicBtnText, { color: "#F97316" }]}>
                 View Papers
               </Text>
@@ -394,15 +398,109 @@ export default function HomePage() {
           <Text style={styles.sectionHeadingText}>Test & Practice</Text>
           <TouchableOpacity
             style={styles.seeAllRowContainer}
-            onPress={() => router.push("/(tabs)/TestPractice")} // 🔥 Bracket ke andar aa gaya
+            onPress={() => router.push("/TestPractice")} // 🔥 Bracket ke andar aa gaya
           >
             <Text style={styles.seeAllActionText}>View All</Text>
             <Feather name="chevron-right" size={14} color="#2563EB" />
           </TouchableOpacity>
         </View>
 
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.academicsCardScroll}
+        >
+          {/* Mock Tests Card */}
+          <View style={styles.academicCardLayout}>
+            <View
+              style={[
+                styles.academicIconWrapper,
+                { backgroundColor: "#EFF6FF" },
+              ]}
+            >
+              <FontAwesome5 name="clipboard-check" size={18} color="#3B82F6" />
+            </View>
+
+            <Text style={styles.academicCardTitle}>Mock Tests</Text>
+
+            <Text style={styles.academicCardDesc}>
+              Attempt full-length mock tests and exams.
+            </Text>
+
+            <TouchableOpacity
+              style={styles.academicCardButton}
+              onPress={() => router.push("/mock-tests")}
+            >
+              <Text style={[styles.academicBtnText, { color: "#3B82F6" }]}>
+                Start Test
+              </Text>
+
+              <Feather name="chevron-right" size={14} color="#3B82F6" />
+            </TouchableOpacity>
+          </View>
+
+          {/* AI Practice Card */}
+          <View style={styles.academicCardLayout}>
+            <View
+              style={[
+                styles.academicIconWrapper,
+                { backgroundColor: "#F3E8FF" },
+              ]}
+            >
+              <FontAwesome5 name="robot" size={18} color="#8B5CF6" />
+            </View>
+
+            <Text style={styles.academicCardTitle}>Quiz</Text>
+
+            <Text style={styles.academicCardDesc}>
+              Attempt quizzes to test your knowledge.
+            </Text>
+
+            <TouchableOpacity
+              style={styles.academicCardButton}
+              onPress={() => router.push("/quiz")}
+            >
+              <Text style={[styles.academicBtnText, { color: "#8B5CF6" }]}>
+                Practice Now
+              </Text>
+
+              <Feather name="chevron-right" size={14} color="#8B5CF6" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Flash Cards Card */}
+          <View style={styles.academicCardLayout}>
+            <View
+              style={[
+                styles.academicIconWrapper,
+                { backgroundColor: "#FFF7ED" },
+              ]}
+            >
+              <FontAwesome5 name="book-open" size={18} color="#F97316" />
+            </View>
+
+            <Text style={styles.academicCardTitle}>Flash Cards</Text>
+
+            <Text style={styles.academicCardDesc}>
+              Revise quickly using smart flash cards.
+            </Text>
+
+            <TouchableOpacity
+              style={styles.academicCardButton}
+              onPress={() => router.push("/TestPractice")}
+            >
+              <Text style={[styles.academicBtnText, { color: "#F97316" }]}>
+                View Cards
+              </Text>
+
+              <Feather name="chevron-right" size={14} color="#F97316" />
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+
+
         {/* Custom Tab Switches */}
-        <View style={styles.subTabRowWrapper}>
+        {/* <View style={styles.subTabRowWrapper}>
           <TouchableOpacity
             style={[
               styles.subTabItem,
@@ -435,10 +533,10 @@ export default function HomePage() {
               Practice
             </Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
 
         {/* Render Test Schedule Lists */}
-        <View style={styles.testListWrapperBox}>
+        {/* <View style={styles.testListWrapperBox}>
           {testSchedules.map((test) => (
             <View key={test.id} style={styles.testScheduleCardItem}>
               <View
@@ -487,11 +585,9 @@ export default function HomePage() {
               style={{ marginLeft: 4 }}
             />
           </TouchableOpacity>
-        </View>
+        </View> */}
 
-        {/* ========================================================
-            🔥 NEW INTEGRATED SECTION: ENGAGEMENT DASHBOARD MODULE 🔥
-           ======================================================== */}
+        {/* ================= SECTION 7: Engagement Section ================= */}
 
         <View style={[styles.sectionHeaderRow, { marginTop: 35 }]}>
           <Text style={styles.sectionHeadingText}>Engagement</Text>
@@ -753,44 +849,109 @@ export default function HomePage() {
               </View>
             </View>
 
-<Modal
-  visible={showNotifications}
-  transparent
-  animationType="fade"
->
-  <TouchableOpacity
-    style={styles.modalOverlay}
-    activeOpacity={1}
-    onPress={() => setShowNotifications(false)}
-  >
-    <View style={styles.notificationModal}>
+            <Modal
+              visible={showNotifications}
+              transparent
+              animationType="fade"
+            >
+              <TouchableOpacity
+                style={styles.modalOverlay}
+                activeOpacity={1}
+                onPress={() => setShowNotifications(false)}
+              >
+                <View style={styles.notificationModal}>
 
-      <Text style={styles.notificationTitle}>
-        Notifications
-      </Text>
+                  <Text style={styles.notificationTitle}>
+                    Notifications
+                  </Text>
 
-      {notifications.length === 0 ? (
-        <Text>No notifications available</Text>
-      ) : (
-        notifications.map((item: any) => (
-          <View
-            key={item.id}
-            style={styles.notificationItem}
-          >
-            <Text style={styles.notificationItemTitle}>
-              🔔 {item.title}
-            </Text>
+                  {notifications.length === 0 ? (
+                    <Text>No notifications available</Text>
+                  ) : (
+                    notifications.map((item: any) => (
+                      <View
+                        key={item.id}
+                        style={styles.notificationItem}
+                      >
+                        <Text style={styles.notificationItemTitle}>
+                          🔔 {item.title}
+                        </Text>
 
-            <Text style={styles.notificationMessage}>
-              {item.message}
-            </Text>
-          </View>
-        ))
-      )}
+                        <Text style={styles.notificationMessage}>
+                          {item.message}
+                        </Text>
+                      </View>
+                    ))
+                  )}
 
-    </View>
-  </TouchableOpacity>
-</Modal>
+                </View>
+              </TouchableOpacity>
+            </Modal>
+
+            <Modal
+              visible={showMenu}
+              transparent
+              animationType="slide"
+            >
+              <TouchableOpacity
+                style={styles.drawerOverlay}
+                activeOpacity={1}
+                onPress={() => setShowMenu(false)}
+              >
+
+                <View style={styles.drawerContainer}>
+
+                  <Text style={styles.drawerTitle}>
+                    Menu
+                  </Text>
+
+                  <TouchableOpacity
+                    style={styles.drawerItem}
+                    onPress={() => {
+                      setShowMenu(false);
+                      router.push("/(tabs)/Profile");
+                    }}
+                  >
+                    <Text>👤 My Profile</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.drawerItem}
+                    onPress={() => {
+                      setShowMenu(false);
+                      Alert.alert("Settings", "Coming Soon");
+                    }}
+                  >
+                    <Text>⚙ Settings</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.drawerItem}
+                    onPress={() => {
+                      setShowMenu(false);
+                      Alert.alert(
+                        "Help & Support",
+                        "support@academyhub.com"
+                      );
+                    }}
+                  >
+                    <Text>❓ Help & Support</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.drawerItem}
+                    onPress={async () => {
+                      await AsyncStorage.removeItem("user");
+                      router.replace("/login");
+                    }}
+                  >
+                    <Text>🚪 Logout</Text>
+                  </TouchableOpacity>
+
+                </View>
+
+              </TouchableOpacity>
+            </Modal>
 
             {/* Badge Item Node 3 (Locked State Representation) */}
             <View
@@ -817,7 +978,7 @@ export default function HomePage() {
         </View>
       </ScrollView>
     </SafeAreaView>
-    
+
   );
 }
 
@@ -1100,103 +1261,103 @@ const styles = StyleSheet.create({
     padding: 4,
     gap: 4,
   },
-  subTabItem: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: "center",
-    borderRadius: 9,
-  },
-  subTabActiveItem: {
-    backgroundColor: "#E2E8F0",
-  },
-  subTabItemText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#64748B",
-  },
-  subTabActiveItemText: {
-    color: "#0F172A",
-  },
-  testListWrapperBox: {
-    marginHorizontal: 20,
-    marginTop: 15,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#F1F5F9",
-    padding: 4,
-  },
-  testScheduleCardItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 12,
-    borderBottomWidth: 1,
-    borderColor: "#F8FAFC",
-  },
-  dateSquareContainer: {
-    width: 52,
-    height: 52,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  dateNumberText: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#FFFFFF",
-    lineHeight: 20,
-  },
-  dateMonthText: {
-    fontSize: 10,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
-  testMetaCenterInfo: {
-    flex: 1,
-    marginLeft: 14,
-  },
-  testTitleMainText: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#0F172A",
-  },
-  testSubTextDesc: {
-    fontSize: 11,
-    color: "#64748B",
-    marginTop: 1,
-  },
-  timeScheduleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 4,
-  },
-  timeRowText: {
-    fontSize: 11,
-    color: "#64748B",
-    fontWeight: "500",
-  },
-  tagTypeContainer: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  tagTypeText: {
-    fontSize: 11,
-    fontWeight: "700",
-  },
-  bottomFooterViewAllBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 14,
-    borderTopWidth: 1,
-    borderColor: "#F8FAFC",
-  },
-  footerViewAllText: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#10B981",
-  },
+  // subTabItem: {
+  //   flex: 1,
+  //   paddingVertical: 10,
+  //   alignItems: "center",
+  //   borderRadius: 9,
+  // },
+  // subTabActiveItem: {
+  //   backgroundColor: "#E2E8F0",
+  // },
+  // subTabItemText: {
+  //   fontSize: 13,
+  //   fontWeight: "600",
+  //   color: "#64748B",
+  // },
+  // subTabActiveItemText: {
+  //   color: "#0F172A",
+  // },
+  // testListWrapperBox: {
+  //   marginHorizontal: 20,
+  //   marginTop: 15,
+  //   backgroundColor: "#FFFFFF",
+  //   borderRadius: 20,
+  //   borderWidth: 1,
+  //   borderColor: "#F1F5F9",
+  //   padding: 4,
+  // },
+  // testScheduleCardItem: {
+  //   flexDirection: "row",
+  //   alignItems: "center",
+  //   padding: 12,
+  //   borderBottomWidth: 1,
+  //   borderColor: "#F8FAFC",
+  // },
+  // dateSquareContainer: {
+  //   width: 52,
+  //   height: 52,
+  //   borderRadius: 14,
+  //   alignItems: "center",
+  //   justifyContent: "center",
+  // },
+  // dateNumberText: {
+  //   fontSize: 18,
+  //   fontWeight: "800",
+  //   color: "#FFFFFF",
+  //   lineHeight: 20,
+  // },
+  // dateMonthText: {
+  //   fontSize: 10,
+  //   fontWeight: "700",
+  //   color: "#FFFFFF",
+  // },
+  // testMetaCenterInfo: {
+  //   flex: 1,
+  //   marginLeft: 14,
+  // },
+  // testTitleMainText: {
+  //   fontSize: 14,
+  //   fontWeight: "700",
+  //   color: "#0F172A",
+  // },
+  // testSubTextDesc: {
+  //   fontSize: 11,
+  //   color: "#64748B",
+  //   marginTop: 1,
+  // },
+  // timeScheduleRow: {
+  //   flexDirection: "row",
+  //   alignItems: "center",
+  //   marginTop: 4,
+  // },
+  // timeRowText: {
+  //   fontSize: 11,
+  //   color: "#64748B",
+  //   fontWeight: "500",
+  // },
+  // tagTypeContainer: {
+  //   paddingHorizontal: 12,
+  //   paddingVertical: 4,
+  //   borderRadius: 8,
+  // },
+  // tagTypeText: {
+  //   fontSize: 11,
+  //   fontWeight: "700",
+  // },
+  // bottomFooterViewAllBtn: {
+  //   flexDirection: "row",
+  //   alignItems: "center",
+  //   justifyContent: "center",
+  //   paddingVertical: 14,
+  //   borderTopWidth: 1,
+  //   borderColor: "#F8FAFC",
+  // },
+  // footerViewAllText: {
+  //   fontSize: 13,
+  //   fontWeight: "700",
+  //   color: "#10B981",
+  // },
 
   /* ========================================================
      🔥 ADDED EXTRA ENGAGEMENT DASHBOARD MODULE STYLING 🔥
@@ -1587,43 +1748,83 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 
-modalOverlay: {
-  flex: 1,
-  backgroundColor: "rgba(0,0,0,0.4)",
-  justifyContent: "center",
-  alignItems: "center",
-},
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
-notificationModal: {
-  width: "90%",
-  backgroundColor: "#FFF",
-  borderRadius: 20,
-  padding: 20,
-  maxHeight: "70%",
-},
+  notificationModal: {
+    width: "90%",
+    backgroundColor: "#FFF",
+    borderRadius: 20,
+    padding: 20,
+    maxHeight: "70%",
+  },
 
-notificationTitle: {
-  fontSize: 22,
-  fontWeight: "700",
-  marginBottom: 15,
-},
+  notificationTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    marginBottom: 15,
+  },
 
-notificationItem: {
-  paddingVertical: 12,
-  borderBottomWidth: 1,
-  borderBottomColor: "#E5E7EB",
-},
+  notificationItem: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+  },
 
-notificationItemTitle: {
-  fontSize: 16,
-  fontWeight: "600",
-  color: "#1E293B",
-},
+  notificationItemTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1E293B",
+  },
 
-notificationMessage: {
-  marginTop: 4,
-  color: "#64748B",
-  fontSize: 14,
-},
+  notificationMessage: {
+    marginTop: 4,
+    color: "#64748B",
+    fontSize: 14,
+  },
+
+  drawerOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.25)",
+    justifyContent: "flex-start",
+  },
+
+  drawerContainer: {
+    width: 290,
+    height: "100%",
+    backgroundColor: "hsla(0, 0%, 99%, 0.92)",
+    paddingTop: 70,
+    paddingHorizontal: 20,
+
+    borderTopRightRadius: 30,
+    borderBottomRightRadius: 30,
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 4,
+      height: 0,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 15,
+
+    elevation: 20,
+  },
+
+  drawerTitle: {
+    fontSize: 34,
+    fontWeight: "700",
+    marginBottom: 30,
+    fontFamily: "font-bold",
+  },
+
+  drawerItem: {
+    paddingVertical: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+  },
 
 });

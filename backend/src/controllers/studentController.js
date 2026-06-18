@@ -222,6 +222,99 @@ const getNotifications = async (req, res) => {
     }
 };
 
+const getQuizTests = async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    const request = new sql.Request();
+
+    const result = await request
+      .input("StudentId", sql.Int, id)
+      .query(`
+        SELECT *
+        FROM QuizTests
+        WHERE studentId = @StudentId
+        ORDER BY id DESC
+      `);
+
+    return res.status(200).json({
+      success: true,
+      quizzes: result.recordset
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
+
+const getMockTests = async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    const request = new sql.Request();
+
+    const result = await request
+      .input("StudentId", sql.Int, id)
+      .query(`
+        SELECT *
+        FROM MockTests
+        WHERE studentId = @StudentId
+        ORDER BY id DESC
+      `);
+
+    return res.status(200).json({
+      success: true,
+      mockTests: result.recordset
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
+
+const getTestResults = async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    const request = new sql.Request();
+
+    const result = await request
+      .input("StudentId", sql.Int, id)
+      .query(`
+        SELECT *
+        FROM TestResults
+        WHERE studentId = @StudentId
+        ORDER BY id DESC
+      `);
+
+    return res.status(200).json({
+      success: true,
+      results: result.recordset
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
+
 module.exports = {
     getDashboard,
     getNotes,
@@ -229,5 +322,8 @@ module.exports = {
     getpreviousPapers,
     getRecordedLectures,
     getSyllabusTracker,
-    getNotifications
+    getNotifications,
+    getQuizTests,
+    getMockTests,
+    getTestResults
 };
