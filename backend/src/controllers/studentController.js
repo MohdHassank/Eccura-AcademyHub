@@ -377,6 +377,43 @@ const getAnnouncements = async (req, res) => {
   }
 };
 
+const getFeesSummary = async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    const request = new sql.Request();
+
+    const result = await request
+      .input("StudentId", sql.Int, id)
+      .query(`
+        SELECT TOP 1 *
+        FROM FeesSummary
+        WHERE studentId = @StudentId
+      `);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Fees summary not found"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      summary: result.recordset[0]
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
+
 module.exports = {
     getDashboard,
     getNotes,
@@ -389,5 +426,6 @@ module.exports = {
     getMockTests,
     getTestResults,
     getNotices,
-    getAnnouncements
+    getAnnouncements,
+    getFeesSummary
 };

@@ -4,7 +4,7 @@ const { sql } = require("../config/db"); // Aapke db.js se global sql instance l
 const signup = async (req, res) => {
   try {
     // 1. Frontend se bheja gaya data Destructure (nikalna) karna
-    const { fullName, email, phone, password, role } = req.body;
+    const { fullName, email, phone, password, role, studentEmail } = req.body;
 
     // 2. Validation: Check karo koi field khali toh nahi hai
     if (!fullName || !email || !phone || !password || !role) {
@@ -59,17 +59,58 @@ const signup = async (req, res) => {
     const insertRequest = new sql.Request();
 
     const insertQuery = `
-      INSERT INTO Students (fullName, email, phone, password, role)
-      VALUES (@FullName, @Email, @Phone, @Password, @Role)
-    `;
+  INSERT INTO Students (fullName, email, phone, password, role)
+  OUTPUT INSERTED.id
+  VALUES (@FullName, @Email, @Phone, @Password, @Role)
+`;
 
-    await insertRequest
-      .input("FullName", sql.NVarChar(100), fullName)
-      .input("Email", sql.NVarChar(100), email)
-      .input("Phone", sql.NVarChar(15), phone)
-      .input("Password", sql.NVarChar(255), hashedPassword) // Hashed password database mein jayega
-      .input("Role", sql.NVarChar(20), role)
-      .query(insertQuery);
+   const insertResult = await insertRequest
+  .input("FullName", sql.NVarChar(100), fullName)
+  .input("Email", sql.NVarChar(100), email)
+  .input("Phone", sql.NVarChar(15), phone)
+  .input("Password", sql.NVarChar(255), hashedPassword)
+  .input("Role", sql.NVarChar(20), role)
+  .query(insertQuery);
+
+const parentId = insertResult.recordset[0].id;
+
+console.log("Parent Linking Started");
+console.log("Role:", role);
+console.log("Student Email:", studentEmail);
+
+if (
+  (role === "guardian" || role === "parent") &&
+  studentEmail
+) {
+
+  const studentResult = await new sql.Request()
+    .input("StudentEmail", sql.NVarChar(100), studentEmail)
+    .query(`
+      SELECT id
+      FROM Students
+      WHERE email = @StudentEmail
+      AND role = 'student'
+    `);
+
+  if (studentResult.recordset.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Student email not found."
+    });
+  }
+
+  const studentId = studentResult.recordset[0].id;
+
+  await new sql.Request()
+    .input("ParentId", sql.Int, parentId)
+    .input("StudentId", sql.Int, studentId)
+    .query(`
+      INSERT INTO ParentChildren
+      (parentId, studentId)
+      VALUES
+      (@ParentId, @StudentId)
+    `);
+}
 
     // 7. Final Success Response return karna
     return res.status(201).json({
