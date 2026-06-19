@@ -1,10 +1,10 @@
 import { Feather, FontAwesome, FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   Alert,
   Image,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -28,6 +28,7 @@ export default function SignUpPage() {
   const [secureConfirmPass, setSecureConfirmPass] = useState(true);
 
   const [selectedRole, setSelectedRole] = useState("student");
+  const [studentEmail, setStudentEmail] = useState("");
   const [isAgreed, setIsAgreed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -80,7 +81,9 @@ export default function SignUpPage() {
             phone: phone.trim(),
             password,
             role: selectedRole,
+            studentEmail: selectedRole === "guardian" || selectedRole === "parent" ? studentEmail.trim().toLowerCase() : undefined,
           }),
+          
         }
       );
 
@@ -203,6 +206,22 @@ export default function SignUpPage() {
               <Text style={styles.roleDesc}>Monitor and support child's learning</Text>
             </TouchableOpacity>
           </View>
+
+          {selectedRole === "guardian" && (
+            <>
+              <Text style={styles.inputLabel}>Student Email ID</Text>
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  placeholder="Enter student's registered email"
+                  value={studentEmail}
+                  onChangeText={setStudentEmail}
+                  style={styles.input}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
+            </>
+          )}
 
           <TouchableOpacity style={styles.checkboxRow} activeOpacity={0.8} onPress={() => setIsAgreed(!isAgreed)}>
             <Feather name={isAgreed ? "check-square" : "square"} size={20} color={isAgreed ? "#2563EB" : "#94A3B8"} />

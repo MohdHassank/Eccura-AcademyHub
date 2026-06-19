@@ -2,11 +2,11 @@ import { Feather, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   Alert,
   Dimensions,
   Image,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   ActivityIndicator,
@@ -91,7 +91,31 @@ export default function LoginPage() {
         Alert.alert("Welcome Back! 🎉", data.message, [
           {
             text: "Let's Go",
-            onPress: () => router.replace("/(tabs)/home"), // Safely route to Dashboard
+            onPress: () => {
+
+              if (data.user.role === "student") {
+                router.replace("/(tabs)/home");
+              }
+
+              else if (data.user.role === "teacher") {
+                router.replace("/teacher/home");
+              }
+
+             else if (data.user.role === "admin") {
+                router.replace("/admin");
+              }
+              else if (
+                data.user.role === "guardian" ||
+                data.user.role === "parent"
+              ) {
+                router.replace("/parent/home");
+              }
+
+              else {
+                router.replace("/(tabs)/home");
+              }
+
+            },
           },
         ]);
       } else {

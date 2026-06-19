@@ -91,10 +91,11 @@ export default function FeesScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* 1. TOP NAVBAR HEADER */}
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.7}>
+                <Ionicons name="arrow-back" size={22} color="#0F172A" />
+              </TouchableOpacity>
       {/* <View style={styles.header}>
-        <TouchableOpacity style={styles.iconButton}>
-          <Feather name="menu" size={22} color="#1E293B" />
-        </TouchableOpacity>
+        
         
         <View style={styles.logoContainer}>
           <View style={styles.logoRow}>
@@ -350,6 +351,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: '#FAFBFD',
+  },
+  backButton: {
+    width: 38, height: 38, borderRadius: 12, borderWidth: 1, borderColor: '#E2E8F0',
+    justifyContent: 'center', alignItems: 'center'
   },
   iconButton: {
     width: 40,

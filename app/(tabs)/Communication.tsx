@@ -1,25 +1,25 @@
 import React, { useCallback } from 'react';
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { 
-  StyleSheet, 
-  Text, 
-  View, 
-  ScrollView, 
-  TouchableOpacity, 
-  Platform,
-  Dimensions,
-  BackHandler
-} from 'react-native';
-import { 
-  Ionicons, 
-  MaterialCommunityIcons, 
-  FontAwesome5, 
-  Feather, 
-  MaterialIcons 
+import {
+  Feather,
+  FontAwesome5,
+  Ionicons,
+  MaterialCommunityIcons,
+  MaterialIcons
 } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
+import { router } from 'expo-router';
+import {
+  BackHandler,
+  Dimensions,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 const { width } = Dimensions.get('window');
 
