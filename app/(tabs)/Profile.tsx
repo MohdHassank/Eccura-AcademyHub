@@ -24,26 +24,27 @@ import {
   TextInput,
   BackHandler,
 } from "react-native";
+import axios from "axios";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function ProfileScreen() {
 
-useFocusEffect(
-  useCallback(() => {
-    const onBackPress = () => {
-      router.replace("/(tabs)/home");
-      return true;
-    };
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        router.replace("/(tabs)/home");
+        return true;
+      };
 
-    const subscription = BackHandler.addEventListener(
-      "hardwareBackPress",
-      onBackPress
-    );
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
 
-    return () => subscription.remove();
-  }, [])
-);
+      return () => subscription.remove();
+    }, [])
+  );
 
   const router = useRouter();
 
@@ -57,66 +58,89 @@ useFocusEffect(
       console.log("Logout Error:", error);
     }
   };
+  const fetchAcademicInfo = async () => {
+    try {
 
+      const user = await AsyncStorage.getItem("user");
+
+      if (!user) return;
+
+      const parsedUser = JSON.parse(user);
+
+      const response = await axios.get(
+        `http://192.168.29.49:5000/api/student/academic-info/${parsedUser.id}`
+      );
+
+      if (response.data.success) {
+        setAcademicInfo(response.data.academicInfo);
+      }
+
+    } catch (error) {
+      console.log("Academic Info Error:", error);
+    }
+  };
   useEffect(() => {
     loadUser();
+    fetchAcademicInfo();
   }, []);
 
-const handleProfileUpdate = async () => {
-  try {
-    const response = await fetch(
-      `http://192.168.29.49:5000/api/auth/profile/${user.id}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+  const handleProfileUpdate = async () => {
+    try {
+      const response = await fetch(
+        `http://192.168.29.49:5000/api/auth/profile/${user.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            fullName: editName,
+            email: editEmail,
+            phone: editPhone,
+          }),
+        }
+      );
+
+
+
+      const data = await response.json();
+
+      if (data.success) {
+        const updatedUser = {
+          ...user,
           fullName: editName,
           email: editEmail,
           phone: editPhone,
-        }),
+        };
+
+        await AsyncStorage.setItem(
+          "user",
+          JSON.stringify(updatedUser)
+        );
+
+        setUser(updatedUser);
+
+        setModalVisible(false);
+
+        Alert.alert(
+          "Success 🎉",
+          "Profile updated successfully"
+        );
+      } else {
+        Alert.alert(
+          "Error",
+          data.message
+        );
       }
-    );
-
-    const data = await response.json();
-
-    if (data.success) {
-      const updatedUser = {
-        ...user,
-        fullName: editName,
-        email: editEmail,
-        phone: editPhone,
-      };
-
-      await AsyncStorage.setItem(
-        "user",
-        JSON.stringify(updatedUser)
-      );
-
-      setUser(updatedUser);
-
-      setModalVisible(false);
+    } catch (error) {
+      console.log(error);
 
       Alert.alert(
-        "Success 🎉",
-        "Profile updated successfully"
-      );
-    } else {
-      Alert.alert(
-        "Error",
-        data.message
+        "Network Error",
+        "Unable to connect to server"
       );
     }
-  } catch (error) {
-    console.log(error);
-
-    Alert.alert(
-      "Network Error",
-      "Unable to connect to server"
-    );
-  }
-};
+  };
 
   const loadUser = async () => {
     try {
@@ -131,6 +155,12 @@ const handleProfileUpdate = async () => {
   };
   const [user, setUser] = useState<any>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [academicInfo, setAcademicInfo] = useState({
+    className: "",
+    rollNumber: "",
+    batchName: "",
+    subjects: [],
+  });
 
   const [editName, setEditName] = useState("");
   const [editEmail, setEditEmail] = useState("");
@@ -143,13 +173,12 @@ const handleProfileUpdate = async () => {
     { id: "s3", label: "Attendance", value: "92%", icon: "calendar-check", color: "#10B981" },
   ];
 
-  // Menu Options Array
-  const menuItems = [
-    { id: "m1", title: "My Certificates", icon: "award", color: "#3B82F6", type: "link" },
-    { id: "m2", title: "Academic Performance", icon: "trending-up", color: "#10B981", type: "link" },
-    { id: "m3", title: "Fee Receipts & History", icon: "credit-card", color: "#F59E0B", type: "link" },
-    { id: "m4", title: "Saved Notes & Papers", icon: "bookmark", color: "#EC4899", type: "link" },
-  ];
+  // Static Academic Information Data
+  const academicData = {
+    class: academicInfo.className || "Not Assigned",
+    rollNumber: academicInfo.rollNumber || "Not Assigned",
+    subjects: academicInfo.subjects || []
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -201,10 +230,7 @@ const handleProfileUpdate = async () => {
           </Text>
 
           {/* Quick Level Indicator */}
-          <View style={styles.levelBadgePill}>
-            <MaterialCommunityIcons name="shield-star" size={14} color="#4F46E5" />
-            <Text style={styles.levelBadgeText}>Level 4 Advanced Scholar</Text>
-          </View>
+
         </View>
 
         {/* ================= ENGAGEMENT STATS GRID ================= */}
@@ -224,27 +250,52 @@ const handleProfileUpdate = async () => {
           ))}
         </View>
 
-        {/* ================= ACADEMIC UTILITIES LINKS ================= */}
+        {/* ================= ACADEMIC CENTER (REPLACED WITH PREMIUM INFORMATION CARD) ================= */}
         <View style={styles.menuSectionContainer}>
           <Text style={styles.menuSectionHeadingText}>Academic Center</Text>
-          <View style={styles.menuCardBoxWrapper}>
-            {menuItems.map((item, index) => (
-              <TouchableOpacity
-                key={item.id}
-                style={[
-                  styles.menuRowItem,
-                  index === menuItems.length - 1 && { borderBottomWidth: 0 }
-                ]}
-              >
-                <View style={styles.menuRowLeftGroup}>
-                  <View style={[styles.menuIconBox, { backgroundColor: `${item.color}10` }]}>
-                    <Feather name={item.icon as any} size={16} color={item.color} />
-                  </View>
-                  <Text style={styles.menuItemTitleText}>{item.title}</Text>
+          <View style={styles.academicInfoCardBox}>
+
+            {/* Class Info Row */}
+            <View style={styles.academicDataMetaRow}>
+              <View style={styles.academicInfoLeftMetaGroup}>
+                <View style={[styles.academicInfoIconBox, { backgroundColor: "#4F46E510" }]}>
+                  <Feather name="book-open" size={15} color="#4F46E5" />
                 </View>
-                <Feather name="chevron-right" size={16} color="#94A3B8" />
-              </TouchableOpacity>
-            ))}
+                <Text style={styles.academicInfoLabelTitle}>Class</Text>
+              </View>
+              <Text style={styles.academicInfoValueContent}>{academicData.class}</Text>
+            </View>
+
+            {/* Roll Number Info Row */}
+            <View style={styles.academicDataMetaRow}>
+              <View style={styles.academicInfoLeftMetaGroup}>
+                <View style={[styles.academicInfoIconBox, { backgroundColor: "#10B98110" }]}>
+                  <Feather name="hash" size={15} color="#10B981" />
+                </View>
+                <Text style={styles.academicInfoLabelTitle}>Roll Number</Text>
+              </View>
+              <Text style={styles.academicInfoValueContent}>{academicData.rollNumber}</Text>
+            </View>
+
+            {/* Selected Subjects Layout Block */}
+            <View style={[styles.academicDataMetaRow, { borderBottomWidth: 0, paddingBottom: 2, flexDirection: 'column', alignItems: 'flex-start', gap: 10 }]}>
+              <View style={styles.academicInfoLeftMetaGroup}>
+                <View style={[styles.academicInfoIconBox, { backgroundColor: "#3B82F610" }]}>
+                  <Feather name="layers" size={15} color="#3B82F6" />
+                </View>
+                <Text style={styles.academicInfoLabelTitle}>Selected Subjects</Text>
+              </View>
+
+              {/* Flexible Wrap Chip Flow Track */}
+              <View style={styles.academicSubjectsChipsContainer}>
+                {academicData.subjects.map((subject, idx) => (
+                  <View key={idx} style={styles.academicSubjectPillItem}>
+                    <Text style={styles.academicSubjectPillText}>{subject}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+
           </View>
         </View>
 
@@ -294,81 +345,82 @@ const handleProfileUpdate = async () => {
         <Text style={styles.appVersionFooterLabel}>v2.4.0 • Made with ❤️ for Students</Text>
       </ScrollView>
       <Modal
-  visible={modalVisible}
-  transparent
-  animationType="slide"
->
-  <View
-    style={{
-      flex: 1,
-      backgroundColor: "rgba(0,0,0,0.4)",
-      justifyContent: "center",
-      alignItems: "center",
-    }}
-  >
-    <View
-      style={{
-        width: "90%",
-        backgroundColor: "#fff",
-        borderRadius: 20,
-        padding: 20,
-      }}
-    >
-      <Text
-        style={{
-          fontSize: 20,
-          fontWeight: "700",
-          marginBottom: 20,
-        }}
+        visible={modalVisible}
+        transparent
+        animationType="slide"
       >
-        Edit Profile
-      </Text>
 
-      <TextInput
-        value={editName}
-        onChangeText={setEditName}
-        placeholder="Full Name"
-        style={styles.input}
-      />
-
-      <TextInput
-        value={editEmail}
-        onChangeText={setEditEmail}
-        placeholder="Email"
-        style={styles.input}
-      />
-
-      <TextInput
-        value={editPhone}
-        onChangeText={setEditPhone}
-        placeholder="Phone"
-        style={styles.input}
-      />
-
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          marginTop: 15,
-        }}
-      >
-        <TouchableOpacity
-          onPress={() => setModalVisible(false)}
-          style={styles.cancelBtn}
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.4)",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
         >
-          <Text style={{ color: "#fff" }}>Cancel</Text>
-        </TouchableOpacity>
+          <View
+            style={{
+              width: "90%",
+              backgroundColor: "#fff",
+              borderRadius: 20,
+              padding: 20,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "700",
+                marginBottom: 20,
+              }}
+            >
+              Edit Profile
+            </Text>
 
-        <TouchableOpacity
-          onPress={handleProfileUpdate}
-          style={styles.saveBtn}
-        >
-          <Text style={{ color: "#fff" }}>Save</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  </View>
-</Modal>
+            <TextInput
+              value={editName}
+              onChangeText={setEditName}
+              placeholder="Full Name"
+              style={styles.input}
+            />
+
+            <TextInput
+              value={editEmail}
+              onChangeText={setEditEmail}
+              placeholder="Email"
+              style={styles.input}
+            />
+
+            <TextInput
+              value={editPhone}
+              onChangeText={setEditPhone}
+              placeholder="Phone"
+              style={styles.input}
+            />
+
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginTop: 15,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                style={styles.cancelBtn}
+              >
+                <Text style={{ color: "#fff" }}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleProfileUpdate}
+                style={styles.saveBtn}
+              >
+                <Text style={{ color: "#fff" }}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -569,6 +621,73 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#1E293B",
   },
+
+  // ================= NEW ACADEMIC CENTER CARD STYLES =================
+  academicInfoCardBox: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.02,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  academicDataMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderColor: "#F1F5F9",
+  },
+  academicInfoLeftMetaGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  academicInfoIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  academicInfoLabelTitle: {
+    fontSize: 13.5,
+    fontWeight: "600",
+    color: "#475569",
+  },
+  academicInfoValueContent: {
+    fontSize: 13.5,
+    fontWeight: "700",
+    color: "#0F172A",
+  },
+  academicSubjectsChipsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 2,
+    width: "100%",
+  },
+  academicSubjectPillItem: {
+    backgroundColor: "#F1F5F9",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+  academicSubjectPillText: {
+    fontSize: 11.5,
+    fontWeight: "600",
+    color: "#334155",
+  },
+  // ===================================================================
+
   logoutActionRowButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -594,26 +713,26 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     marginTop: 20,
   },
-   input: {
-  borderWidth: 1,
-  borderColor: "#CBD5E1",
-  borderRadius: 10,
-  paddingHorizontal: 12,
-  height: 50,
-  marginBottom: 12,
-},
+  input: {
+    borderWidth: 1,
+    borderColor: "#CBD5E1",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    height: 50,
+    marginBottom: 12,
+  },
 
-saveBtn: {
-  backgroundColor: "#2563EB",
-  paddingHorizontal: 25,
-  paddingVertical: 12,
-  borderRadius: 10,
-},
+  saveBtn: {
+    backgroundColor: "#2563EB",
+    paddingHorizontal: 25,
+    paddingVertical: 12,
+    borderRadius: 10,
+  },
 
-cancelBtn: {
-  backgroundColor: "#EF4444",
-  paddingHorizontal: 25,
-  paddingVertical: 12,
-  borderRadius: 10,
-},
+  cancelBtn: {
+    backgroundColor: "#EF4444",
+    paddingHorizontal: 25,
+    paddingVertical: 12,
+    borderRadius: 10,
+  },
 });

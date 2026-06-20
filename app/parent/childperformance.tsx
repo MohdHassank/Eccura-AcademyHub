@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -12,12 +12,18 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons, Feather, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 const { width } = Dimensions.get('window');
 
 export default function ChildPerformanceScreen() {
   const router = useRouter();
-  
+
+  const [performanceData, setPerformanceData] = useState([]);
+  const [weakSubjects, setWeakSubjects] = useState([]);
+  const [progressTrends, setProgressTrends] = useState([]);
+
   // Simulated Tab State for switching semesters/terms easily if needed
   const [activeTerm, setActiveTerm] = useState<'Term 1' | 'Term 2'>('Term 1');
 
@@ -37,6 +43,36 @@ export default function ChildPerformanceScreen() {
     </View>
   );
 
+  const fetchPerformance = async () => {
+    try {
+
+      const userString = await AsyncStorage.getItem("user");
+
+      if (!userString) return;
+
+      const user = JSON.parse(userString);
+
+      const response = await axios.get(
+        `http://192.168.29.49:5000/api/parent/child-performance/${user.id}`
+      );
+
+      setPerformanceData(response.data.performance);
+      setWeakSubjects(response.data.weakSubjects);
+      setProgressTrends(response.data.progressTrends);
+
+    } catch (error) {
+
+      console.log("Performance Error:", error);
+
+    }
+  };
+
+  useEffect(() => {
+    fetchPerformance();
+  }, []);
+  console.log("Performance", performanceData);
+  console.log("Weak", weakSubjects);
+  console.log("Trends", progressTrends);
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
@@ -51,41 +87,8 @@ export default function ChildPerformanceScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollCanvas}>
-        
+
         {/* 1. TOP OVERVIEW METRICS (RANK & ATTENDANCE & TOTAL MARKS) */}
-        <View style={styles.metricsSummaryRow}>
-          
-          {/* Rank Card */}
-          <View style={styles.summaryCard}>
-            <View style={[styles.iconCircle, { backgroundColor: '#FFF7ED' }]}>
-              <FontAwesome5 name="award" size={16} color="#F97316" />
-            </View>
-            <Text style={styles.summaryValue}>04th</Text>
-            <Text style={styles.summaryLabel}>Class Rank</Text>
-            <Text style={styles.summarySubLabel}>Out of 42 students</Text>
-          </View>
-
-          {/* Attendance Card */}
-          <View style={styles.summaryCard}>
-            <View style={[styles.iconCircle, { backgroundColor: '#E6F4EA' }]}>
-              <Feather name="calendar" size={16} color="#137333" />
-            </View>
-            <Text style={styles.summaryValue}>92%</Text>
-            <Text style={styles.summaryLabel}>Attendance</Text>
-            <Text style={styles.summarySubLabel}>24/26 Days this month</Text>
-          </View>
-
-          {/* Aggregate Marks Card */}
-          <View style={styles.summaryCard}>
-            <View style={[styles.iconCircle, { backgroundColor: '#EFF6FF' }]}>
-              <Feather name="trending-up" size={16} color="#2563EB" />
-            </View>
-            <Text style={styles.summaryValue}>88.4%</Text>
-            <Text style={styles.summaryLabel}>Aggregate Marks</Text>
-            <Text style={styles.summarySubLabel}>Grade A (Excellent)</Text>
-          </View>
-
-        </View>
 
         {/* 2. SUBJECT-WISE PERFORMANCE ACCORDION GRID */}
         <View style={styles.sectionBlock}>
@@ -93,35 +96,83 @@ export default function ChildPerformanceScreen() {
             <Text style={styles.sectionTitle}>Subject Performance</Text>
             <Text style={styles.termSelectorText}>Term 1 Records</Text>
           </View>
-          
+
           <View style={styles.cardFrame}>
-            <SubjectPerformanceRow name="Mathematics" marks="94/100" grade="A+" color="#2563EB" />
-            <SubjectPerformanceRow name="Physics" marks="88/100" grade="A" color="#8B5CF6" />
-            <SubjectPerformanceRow name="Chemistry" marks="85/100" grade="A" color="#0D9488" />
-            <SubjectPerformanceRow name="Computer Science" marks="96/100" grade="A+" color="#10B981" />
-            <SubjectPerformanceRow name="English Literature" marks="79/100" grade="B+" color="#F59E0B" />
+            {
+              performanceData.map((item: any, index) => {
+
+                const colors = [
+                  "#2563EB",
+                  "#8B5CF6",
+                  "#0D9488",
+                  "#10B981",
+                  "#F59E0B"
+                ];
+
+                return (
+                  <SubjectPerformanceRow
+                    key={item.id}
+                    name={item.subjectName}
+                    marks={
+                      item.marks === "--"
+                        ? "--"
+                        : `${item.marks}/${item.totalMarks}`
+                    }
+                    grade={item.grade}
+                    color={colors[index % colors.length]}
+                  />
+                );
+              })
+            }
           </View>
         </View>
 
         {/* 3. WEAK SUBJECTS & FOCUS AREAS (CRITICAL TRACKER) */}
         <View style={styles.sectionBlock}>
-          <Text style={styles.sectionTitle}>Weak Subjects & Focus Areas</Text>
-          <Text style={styles.sectionSubtitle}>Subjects where child needs extra attention or guidance</Text>
-          
-          <View style={[styles.cardFrame, { borderColor: '#FEE2E2', backgroundColor: '#FFFDFD' }]}>
-            <View style={styles.weakSubjectRow}>
-              <View style={styles.weakAlertHeader}>
-                <MaterialCommunityIcons name="alert-decagram" size={18} color="#EF4444" />
-                <Text style={styles.weakSubjectName}>English Literature (79/100)</Text>
+          <Text style={styles.sectionTitle}>
+            Weak Subjects & Focus Areas
+          </Text>
+
+          <Text style={styles.sectionSubtitle}>
+            Subjects where child needs extra attention
+          </Text>
+          {
+            weakSubjects.map((item: any) => (
+              <View
+                key={item.id}
+                style={[styles.cardFrame, {
+                  borderColor: '#FEE2E2',
+                  backgroundColor: '#FFFDFD'
+                }]}
+              >
+                <View style={styles.weakSubjectRow}>
+
+                  <View style={styles.weakAlertHeader}>
+                    <MaterialCommunityIcons
+                      name="alert-decagram"
+                      size={18}
+                      color="#EF4444"
+                    />
+
+                    <Text style={styles.weakSubjectName}>
+                      {item.subjectName} ({item.score}/100)
+                    </Text>
+                  </View>
+
+                  <Text style={styles.weakSubjectDesc}>
+                    {item.recommendation}
+                  </Text>
+
+                  <View style={styles.remedialBadge}>
+                    <Text style={styles.remedialBadgeText}>
+                      Remedial Class Scheduled: {item.remedialSchedule}
+                    </Text>
+                  </View>
+
+                </View>
               </View>
-              <Text style={styles.weakSubjectDesc}>
-                Bhai, child is performing well overall, but needs to work on long-form creative writing responses and grammar compliance.
-              </Text>
-              <View style={styles.remedialBadge}>
-                <Text style={styles.remedialBadgeText}>Remedial Class Scheduled: Every Friday</Text>
-              </View>
-            </View>
-          </View>
+            ))
+          }
         </View>
 
         {/* 4. PROGRESS TRENDS (PARENT-FRIENDLY TIMELINE ELEVATION) */}
@@ -129,49 +180,72 @@ export default function ChildPerformanceScreen() {
           <Text style={styles.sectionTitle}>Progress Trends</Text>
           <Text style={styles.sectionSubtitle}>Month-on-month academic growth comparison</Text>
 
+
           <View style={styles.cardFrame}>
-            {/* Trend 1 */}
-            <View style={styles.trendItem}>
-              <View style={styles.trendLeftBox}>
-                <View style={[styles.trendArrowFrame, { backgroundColor: '#E6F4EA' }]}>
-                  <Feather name="arrow-up-right" size={14} color="#137333" />
-                </View>
-                <View>
-                  <Text style={styles.trendTitle}>Monthly Unit Test 3</Text>
-                  <Text style={styles.trendDate}>Compared to Unit Test 2</Text>
-                </View>
-              </View>
-              <Text style={[styles.trendMetricText, { color: '#137333' }]}>+3.2% Growth</Text>
-            </View>
+            {
+              progressTrends.map((item: any) => (
+                <View
+                  key={item.id}
+                  style={styles.trendItem}
+                >
 
-            {/* Trend 2 */}
-            <View style={styles.trendItem}>
-              <View style={styles.trendLeftBox}>
-                <View style={[styles.trendArrowFrame, { backgroundColor: '#E6F4EA' }]}>
-                  <Feather name="arrow-up-right" size={14} color="#137333" />
-                </View>
-                <View>
-                  <Text style={styles.trendTitle}>Mathematics Assignments</Text>
-                  <Text style={styles.trendDate}>Consistency index</Text>
-                </View>
-              </View>
-              <Text style={[styles.trendMetricText, { color: '#137333' }]}>Consistent (95%)</Text>
-            </View>
+                  <View style={styles.trendLeftBox}>
+                    <View
+                      style={[
+                        styles.trendArrowFrame,
+                        {
+                          backgroundColor:
+                            item.trendValue.includes("-")
+                              ? "#FEE2E2"
+                              : "#E6F4EA"
+                        }
+                      ]}
+                    >
+                      <Feather
+                        name={
+                          item.trendValue.includes("-")
+                            ? "arrow-down-left"
+                            : "arrow-up-right"
+                        }
+                        size={14}
+                        color={
+                          item.trendValue.includes("-")
+                            ? "#EF4444"
+                            : "#137333"
+                        }
+                      />
+                    </View>
 
-            {/* Trend 3 */}
-            <View style={[styles.trendItem, { borderBottomWidth: 0, paddingBottom: 0 }]}>
-              <View style={styles.trendLeftBox}>
-                <View style={[styles.trendArrowFrame, { backgroundColor: '#FEE2E2' }]}>
-                  <Feather name="arrow-down-left" size={14} color="#EF4444" />
+                    <View>
+                      <Text style={styles.trendTitle}>
+                        {item.title}
+                      </Text>
+
+                      <Text style={styles.trendDate}>
+                        {item.description}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <Text
+                    style={[
+                      styles.trendMetricText,
+                      {
+                        color:
+                          item.trendValue.includes("-")
+                            ? "#EF4444"
+                            : "#137333"
+                      }
+                    ]}
+                  >
+                    {item.trendValue}
+                  </Text>
+
                 </View>
-                <View>
-                  <Text style={styles.trendTitle}>Attendance Regularity</Text>
-                  <Text style={styles.trendDate}>Due to marriage leaves</Text>
-                </View>
-              </View>
-              <Text style={[styles.trendMetricText, { color: '#EF4444' }]}>-1.5% Drop</Text>
-            </View>
+              ))
+            }
           </View>
+
         </View>
 
       </ScrollView>
@@ -192,7 +266,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontSize: 16, fontWeight: '700', color: '#0F172A' },
   scrollCanvas: { padding: 16, paddingBottom: 40 },
-  
+
   // Top horizontal summary cards
   metricsSummaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 },
   summaryCard: {

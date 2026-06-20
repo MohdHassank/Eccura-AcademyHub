@@ -23,6 +23,10 @@ const studentRoutes = require("./routes/studentRoutes");
 
 app.use("/api/student", studentRoutes);
 
+const parentRoutes = require("./routes/parentRoutes");
+
+app.use("/api/parent", parentRoutes);
+
 // 6. Server ki port define karna aur listen karna
 const PORT = 5000;
 app.listen(PORT, () => {

@@ -36,4 +36,9 @@ router.get(
   studentController.getFeesSummary
 );
 
+router.get(
+  "/academic-info/:id",
+  studentController.getAcademicInfo
+);
+
 module.exports = router;

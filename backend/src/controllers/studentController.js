@@ -414,6 +414,56 @@ const getFeesSummary = async (req, res) => {
   }
 };
 
+const getAcademicInfo = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const request = new sql.Request();
+
+    const result = await request
+      .input("StudentId", sql.Int, id)
+      .query(`
+        SELECT
+          class_name,
+          roll_number,
+
+          subjects
+        FROM students
+        WHERE id = @StudentId
+      `);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found"
+      });
+    }
+
+    const student = result.recordset[0];
+
+    return res.status(200).json({
+      success: true,
+      academicInfo: {
+        className: student.class_name,
+        rollNumber: student.roll_number,
+        subjects: student.subjects
+          ? student.subjects.split(",")
+          : []
+      }
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
+
 module.exports = {
     getDashboard,
     getNotes,
@@ -427,5 +477,6 @@ module.exports = {
     getTestResults,
     getNotices,
     getAnnouncements,
-    getFeesSummary
+    getFeesSummary,
+    getAcademicInfo
 };
