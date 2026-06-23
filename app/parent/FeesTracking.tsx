@@ -45,15 +45,17 @@ export default function FeesScreen() {
       const user = JSON.parse(userData);
 
       console.log("User Object:", user);
+      const selectedChildId =
+        await AsyncStorage.getItem("selectedChildId");
 
       const response = await axios.get(
-        `http://192.168.29.49:5000/api/student/feesSummary/${user.id}`
+        `http://192.168.29.49:5000/api/parent/fees/${selectedChildId}`
       );
 
       console.log("API Response:", response.data);
 
       if (response.data.success) {
-        setFeeSummary(response.data.summary);
+        setFeeSummary(response.data.fees);
       }
 
     } catch (error) {
@@ -91,9 +93,15 @@ export default function FeesScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* 1. TOP NAVBAR HEADER */}
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.7}>
-                <Ionicons name="arrow-back" size={22} color="#0F172A" />
-              </TouchableOpacity>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.7}>
+          <Ionicons name="arrow-back" size={22} color="#0F172A" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Fee Tracking </Text>
+
+        <View style={{ width: 38 }} />
+      </View>
+
       {/* <View style={styles.header}>
         
         
@@ -116,10 +124,7 @@ export default function FeesScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         {/* 2. TITLE SECTION */}
-        <View style={styles.titleSection}>
-          <Text style={styles.pageTitle}>Fees</Text>
-          <Text style={styles.pageSubtitle}>Manage your fee payments in one secure place.</Text>
-        </View>
+
 
         {/* 3. TOTAL PAYABLE & PROGRESS OVERVIEW CARD */}
         <View style={styles.overviewCard}>
@@ -217,7 +222,9 @@ export default function FeesScreen() {
               </View>
               <View style={styles.badgeSubBlock}>
                 <Text style={styles.badgeSubLabel}>Due Date</Text>
-                <Text style={styles.badgeSubValueDark}>25 May 2025</Text>
+                <Text style={styles.badgeSubValueDark}>
+                  Contact Admin
+                </Text>
               </View>
             </View>
           </View>
@@ -352,6 +359,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: '#FAFBFD',
   },
+  headerTitle: { fontSize: 16, fontWeight: '700', color: '#0F172A' },
   backButton: {
     width: 38, height: 38, borderRadius: 12, borderWidth: 1, borderColor: '#E2E8F0',
     justifyContent: 'center', alignItems: 'center'

@@ -16,6 +16,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import axios from "axios";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -91,7 +92,7 @@ export default function LoginPage() {
         Alert.alert("Welcome Back! 🎉", data.message, [
           {
             text: "Let's Go",
-            onPress: () => {
+            onPress: async () => {
 
               if (data.user.role === "student") {
                 router.replace("/(tabs)/home");
@@ -101,14 +102,35 @@ export default function LoginPage() {
                 router.replace("/teacher/home");
               }
 
-             else if (data.user.role === "admin") {
+              else if (data.user.role === "admin") {
                 router.replace("/admin");
               }
               else if (
                 data.user.role === "guardian" ||
                 data.user.role === "parent"
               ) {
-                router.replace("/parent/home");
+
+                const childResponse = await axios.get(
+                  `http://192.168.29.49:5000/api/parent/children/${data.user.id}`
+                );
+
+                const children = childResponse.data.children;
+
+                if (children.length === 1) {
+
+                  await AsyncStorage.setItem(
+                    "selectedChildId",
+                    children[0].id.toString()
+                  );
+
+                  router.replace("/parent/home");
+
+                } else {
+
+                  router.replace("/parent/linked-child");
+
+                }
+
               }
 
               else {

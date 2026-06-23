@@ -36,6 +36,7 @@ export default function ParentDashboardScreen() {
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
+  const [parentName, setParentName] = useState("");
 
   const fetchParentDashboard = async () => {
     try {
@@ -45,8 +46,15 @@ export default function ParentDashboardScreen() {
 
       const user = JSON.parse(userString);
 
+      setParentName(user.fullName);
+
+      const selectedChildId =
+        await AsyncStorage.getItem(
+          "selectedChildId"
+        );
+
       const response = await axios.get(
-        `http://192.168.29.49:5000/api/parent/dashboard/${user.id}`
+        `http://192.168.29.49:5000/api/parent/dashboard/${selectedChildId}`
       );
 
       if (response.data.success) {
@@ -62,6 +70,28 @@ export default function ParentDashboardScreen() {
   useEffect(() => {
     fetchParentDashboard();
   }, []);
+  const getSubjectIcon = (subject: string) => {
+    switch (subject.toLowerCase()) {
+
+      case "java":
+        return "language-java";
+
+      case "dbms":
+        return "database";
+
+      case "python":
+        return "language-python";
+
+      case "c++":
+        return "code-tags";
+
+      case "web technology":
+        return "web";
+
+      default:
+        return "book-open-page-variant";
+    }
+  };
 
 
   if (loading) {
@@ -113,7 +143,7 @@ export default function ParentDashboardScreen() {
           </Text>
           <View style={styles.parentNameRow}>
             <Text style={styles.parentMainName}>
-              {dashboardData?.parent?.fullName || "Parent"} 👋
+              {parentName || "Parent"} 👋
             </Text>
           </View>
           <Text style={styles.subDashboardWelcome}>Welcome to your Parent Dashboard</Text>
@@ -129,7 +159,7 @@ export default function ParentDashboardScreen() {
               <Text style={styles.childProfileNameText}>
                 {dashboardData?.student?.fullName || "Student"}
               </Text>
-              <Text style={styles.childClassStreamText}>Class Class {dashboardData?.student?.class_name || "N/A"}</Text>
+              <Text style={styles.childClassStreamText}> Class : {dashboardData?.student?.class_name || "N/A"}</Text>
               <View style={styles.rollNumberContainerBadge}>
                 <Text style={styles.rollNoTextTitle}>Roll No. {dashboardData?.student?.roll_number || "N/A"}</Text>
               </View>
@@ -169,7 +199,9 @@ export default function ParentDashboardScreen() {
             <View style={styles.individualStatBlockItem}>
               <Feather name="book-open" size={16} color="#805AD5" style={styles.statComponentIcon} />
               <Text style={styles.statMetricLabelText}>Subjects</Text>
-              <Text style={[styles.statValueCoreMain, { color: '#2D3748' }]}>6</Text>
+              <Text>
+                {dashboardData?.student?.subjects?.length || 0}
+              </Text>
               <Text style={styles.statSubMetaMessageText}>Enrolled</Text>
             </View>
 
@@ -186,58 +218,51 @@ export default function ParentDashboardScreen() {
 
         {/* 4. CHILD PERFORMANCE SECTION (MOVED UP) */}
         <View style={styles.sectionHeaderFlexContainerRow}>
-          <Text style={styles.sectionModuleHeaderHeadlineText}>Child Performance</Text>
+          <Text style={styles.sectionModuleHeaderHeadlineText}>Student Performance</Text>
           <TouchableOpacity activeOpacity={0.6} onPress={() => router.push('/parent/childperformance')}>
             <Text style={styles.viewAllTriggerActionText}>View All</Text>
           </TouchableOpacity>
         </View>
 
         {/* HORIZONTAL GRID SCROLLER FOR SUBJECT CARDS */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.horizontalGridSubjectScrollerFrameContainer}
-        >
-          {/* Card 1: Physics */}
-          <View style={styles.subjectPerformanceGridCardItemFrameBox}>
-            <View style={[styles.subjectIconWrapCircularFrame, { backgroundColor: '#E6F4EA' }]}>
-              <MaterialCommunityIcons name="atom" size={18} color="#38A169" />
-            </View>
-            <Text style={styles.subjectCardTitleLabelNameText}>Physics</Text>
-            <Text style={styles.subjectPerformancePercentageScoreMainValueText}>78%</Text>
-            <Text style={[styles.subjectRemedialStatusTextIndicatorTagLabel, { color: '#38A169' }]}>Good</Text>
-          </View>
+        <View style={styles.listContainer}>
+          {dashboardData?.performance
+            ?.slice(0, 3)
+            .map((item: any, index: number) => (
+              <View key={index} style={styles.rowCard}>
+                <View style={[styles.listIconWrap, { backgroundColor: "#EFF6FF" }]}>
+                  <MaterialCommunityIcons name={getSubjectIcon(item.subjectName)} size={20} color="#2563EB" />
+                </View>
 
-          {/* Card 2: Maths */}
-          <View style={styles.subjectPerformanceGridCardItemFrameBox}>
-            <View style={[styles.subjectIconWrapCircularFrame, { backgroundColor: '#EBF8FF' }]}>
-              <MaterialCommunityIcons name="calculator" size={18} color="#3182CE" />
-            </View>
-            <Text style={styles.subjectCardTitleLabelNameText}>Maths</Text>
-            <Text style={styles.subjectPerformancePercentageScoreMainValueText}>85%</Text>
-            <Text style={[styles.subjectRemedialStatusTextIndicatorTagLabel, { color: '#3182CE' }]}>Very Good</Text>
-          </View>
+                <View style={styles.rowMiddleContent}>
+                  <View style={styles.rowTopLine}>
+                    <Text style={styles.rowSubjectTitle}>
+                      {item.subjectName}
+                    </Text>
 
-          {/* Card 3: Chemistry */}
-          <View style={styles.subjectPerformanceGridCardItemFrameBox}>
-            <View style={[styles.subjectIconWrapCircularFrame, { backgroundColor: '#F3E8FF' }]}>
-              <MaterialCommunityIcons name="flask-outline" size={18} color="#805AD5" />
-            </View>
-            <Text style={styles.subjectCardTitleLabelNameText}>Chemistry</Text>
-            <Text style={styles.subjectPerformancePercentageScoreMainValueText}>92%</Text>
-            <Text style={[styles.subjectRemedialStatusTextIndicatorTagLabel, { color: '#805AD5' }]}>Excellent</Text>
-          </View>
-
-          {/* Card 4: English */}
-          <View style={styles.subjectPerformanceGridCardItemFrameBox}>
-            <View style={[styles.subjectIconWrapCircularFrame, { backgroundColor: '#FFFAF0' }]}>
-              <MaterialCommunityIcons name="book-open-page-variant" size={18} color="#DD6B20" />
-            </View>
-            <Text style={styles.subjectCardTitleLabelNameText}>English</Text>
-            <Text style={styles.subjectPerformancePercentageScoreMainValueText}>88%</Text>
-            <Text style={[styles.subjectRemedialStatusTextIndicatorTagLabel, { color: '#DD6B20' }]}>Very Good</Text>
-          </View>
-        </ScrollView>
+                    <Text style={styles.rowScoreText}>
+                      {item.marks}%
+                    </Text>
+                  </View>
+                  {/* Modern Minimal Progress track */}
+                  <View style={styles.progressTrack}>
+                    <View style={[styles.progressBar, {
+                      width:
+                        item.marks === "--"
+                          ? "0%"
+                          : `${item.marks}%`, backgroundColor:
+                        item.marks >= 90
+                          ? "#10B981"
+                          : item.marks >= 75
+                            ? "#3B82F6"
+                            : "#F59E0B"
+                    }]} />
+                  </View>
+                  <Text style={[styles.rowStatusText, { color: "#16A34A" }]}>{item.status}</Text>
+                </View>
+              </View>
+            ))}
+        </View>
 
         {/* 5. NEW CONNECT & SUPPORT SECTION (REPLACED RECENT UPDATES) */}
         <View style={[styles.sectionHeaderFlexContainerRow, { marginTop: 28 }]}>
@@ -384,22 +409,22 @@ export default function ParentDashboardScreen() {
             </View>
 
             <View style={[styles.academicDataMetaRow, { borderBottomWidth: 0, paddingBottom: 2, flexDirection: 'column', alignItems: 'flex-start', gap: 10 }]}>
-                          <View style={styles.academicInfoLeftMetaGroup}>
-                            <View style={[styles.academicInfoIconBox, { backgroundColor: "#3B82F610" }]}>
-                              <Feather name="layers" size={15} color="#3B82F6" />
-                            </View>
-                            <Text style={styles.academicInfoLabelTitle}>Selected Subjects</Text>
-                          </View>
-            
-                          {/* Flexible Wrap Chip Flow Track */}
-                          <View style={styles.academicSubjectsChipsContainer}>
-                            {(dashboardData?.student?.subjects ?? []).map((subject: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined, idx: React.Key | null | undefined) => (
-                              <View key={idx} style={styles.academicSubjectPillItem}>
-                                <Text style={styles.academicSubjectPillText}>{subject}</Text>
-                              </View>
-                            ))}
-                          </View>
-                        </View>
+              <View style={styles.academicInfoLeftMetaGroup}>
+                <View style={[styles.academicInfoIconBox, { backgroundColor: "#3B82F610" }]}>
+                  <Feather name="layers" size={15} color="#3B82F6" />
+                </View>
+                <Text style={styles.academicInfoLabelTitle}>Selected Subjects</Text>
+              </View>
+
+              {/* Flexible Wrap Chip Flow Track */}
+              <View style={styles.academicSubjectsChipsContainer}>
+                {(dashboardData?.student?.subjects ?? []).map((subject: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined, idx: React.Key | null | undefined) => (
+                  <View key={idx} style={styles.academicSubjectPillItem}>
+                    <Text style={styles.academicSubjectPillText}>{subject}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
 
           </TouchableOpacity>
         </TouchableOpacity>
@@ -576,12 +601,60 @@ const styles = StyleSheet.create({
   viewAllTriggerActionText: { fontSize: 11, fontWeight: '600', color: '#3182CE' },
 
   // 5. Subject micro grid cards style definitions
-  horizontalGridSubjectScrollerFrameContainer: { gap: 12, paddingRight: 10 },
-  subjectPerformanceGridCardItemFrameBox: {
-    width: (width - 64) / 3.5, backgroundColor: '#FFFFFF', borderRadius: 16,
-    padding: 12, alignItems: 'center', borderWidth: 1, borderColor: '#EDF2F7',
-    shadowColor: '#1A365D', shadowOpacity: 0.02, shadowRadius: 8, shadowOffset: { width: 0, height: 4 },
-    elevation: 1
+  listContainer: {
+    paddingHorizontal: 16,
+    gap: 10,
+  },
+  rowCard: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 14,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  listIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  rowMiddleContent: {
+    flex: 1,
+    marginLeft: 14,
+  },
+  rowTopLine: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  rowSubjectTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1A365D',
+  },
+  rowScoreText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#1A365D',
+  },
+  progressTrack: {
+    height: 5,
+    backgroundColor: '#F1F5F9',
+    borderRadius: 3,
+    marginTop: 6,
+    marginBottom: 4,
+    overflow: 'hidden',
+  },
+  progressBar: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  rowStatusText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
   subjectIconWrapCircularFrame: {
     width: 32, height: 32, borderRadius: 16,
@@ -626,7 +699,7 @@ const styles = StyleSheet.create({
     width: 13, height: 13, borderRadius: 6.5, justifyContent: 'center', alignItems: 'center'
   },
   bottomTabBadgeTextContentMini: { color: '#FFFFFF', fontSize: 8, fontWeight: '700' },
-  
+
   academicDataMetaRow: {
     flexDirection: "row",
     alignItems: "center",

@@ -44,28 +44,43 @@ export default function ChildPerformanceScreen() {
   );
 
   const fetchPerformance = async () => {
-    try {
+  try {
 
-      const userString = await AsyncStorage.getItem("user");
+    const userString =
+      await AsyncStorage.getItem("user");
 
-      if (!userString) return;
+    if (!userString) return;
 
-      const user = JSON.parse(userString);
-
-      const response = await axios.get(
-        `http://192.168.29.49:5000/api/parent/child-performance/${user.id}`
+    const selectedChildId =
+      await AsyncStorage.getItem(
+        "selectedChildId"
       );
 
-      setPerformanceData(response.data.performance);
-      setWeakSubjects(response.data.weakSubjects);
-      setProgressTrends(response.data.progressTrends);
+    const response = await axios.get(
+      `http://192.168.29.49:5000/api/parent/child-performance/${selectedChildId}`
+    );
 
-    } catch (error) {
+    setPerformanceData(
+      response.data.performance
+    );
 
-      console.log("Performance Error:", error);
+    setWeakSubjects(
+      response.data.weakSubjects
+    );
 
-    }
-  };
+    setProgressTrends(
+      response.data.progressTrends
+    );
+
+  } catch (error) {
+
+    console.log(
+      "Performance Error:",
+      error
+    );
+
+  }
+};
 
   useEffect(() => {
     fetchPerformance();
