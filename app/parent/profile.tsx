@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 import {
   StyleSheet,
   Text,
@@ -7,7 +9,8 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  Platform
+  Platform,
+  Modal
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -25,6 +28,77 @@ interface MenuRowProps {
 
 export default function ParentProfileScreen() {
   const router = useRouter();
+  const [parentData, setParentData] = useState<any>(null);
+
+  const [profileModalVisible, setProfileModalVisible] = useState(false);
+
+  const [childrenModalVisible, setChildrenModalVisible] = useState(false);
+
+  const [linkedChildren, setLinkedChildren] = useState([]);
+
+  const fetchParentProfile = async () => {
+
+    try {
+
+      const userString =
+        await AsyncStorage.getItem("user");
+
+      if (!userString) return;
+
+      const user = JSON.parse(userString);
+
+      const response = await axios.get(
+        `http://192.168.29.49:5000/api/parent/profile/${user.id}`
+      );
+
+      if (response.data.success) {
+        setParentData(response.data.parent);
+      }
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+
+  };
+
+
+  const fetchLinkedChildren = async () => {
+
+    try {
+
+      const userString =
+        await AsyncStorage.getItem("user");
+
+      if (!userString) return;
+
+      const user = JSON.parse(userString);
+
+      const response = await axios.get(
+        `http://192.168.29.49:5000/api/parent/children/${user.id}`
+      );
+
+      if (response.data.success) {
+
+        setLinkedChildren(
+          response.data.children
+        );
+
+      }
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+
+  };
+
+  useEffect(() => {
+    fetchParentProfile();
+    fetchLinkedChildren();
+  }, []);
 
   // Reusable Option Component
   const MenuRowItem = ({ icon, isIonicons, title, subtitle, accentColor, onPress, showBadge }: MenuRowProps) => (
@@ -67,46 +141,53 @@ export default function ParentProfileScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollCanvas}>
-        
+
         {/* TOP AVATAR IDENTIFIER HERO CARD */}
         <View style={styles.avatarHeroCard}>
           <View style={styles.heroAvatarCircle}>
             <MaterialCommunityIcons name="account-tie" size={42} color="#6D28D9" />
           </View>
-          <Text style={styles.heroParentName}>Mr. Hassan Khan</Text>
-          <Text style={styles.heroParentMeta}>Primary Parent Account • AcademyHub</Text>
+          <Text style={styles.heroParentName}>{parentData?.fullName || "Parent"}</Text>
         </View>
 
         {/* CORE PROFILE LIST FRAME */}
         <Text style={styles.sectionLabelTitle}>Profile Configuration</Text>
         <View style={styles.cardWrapper}>
-          
-          <MenuRowItem 
+
+          <MenuRowItem
             icon="user"
             title="Parent Profile"
             subtitle="Personal details, contact numbers & email"
             accentColor="#3B82F6"
             showBadge={true}
-            onPress={() => Alert.alert('Profile Data', 'Bhai, personal database update screen trigger ho jayegi.')}
+            onPress={() =>
+              setProfileModalVisible(true)
+            }
           />
 
-          <MenuRowItem 
+          <MenuRowItem
             icon="users"
-            title="Linked Children"
-            subtitle="Hassan Khan (Class 10-A) • Add/View dependents"
+            title="Linked Student"
+            subtitle={
+              linkedChildren.length > 0
+                ? `${linkedChildren.length} Linked Student  ${linkedChildren.length > 1 ? "" : ""}`
+                : "No Student Linked"
+            }
             accentColor="#6D28D9"
-            onPress={() => Alert.alert('Linked Children', 'Bhai, links parameters aur multi-child profiling dikhegi.')}
+            onPress={() => setChildrenModalVisible(true)}
           />
 
-          <MenuRowItem 
+          <MenuRowItem
             icon="help-circle"
             title="Contact Support"
             subtitle="Direct helpline desk, raise instant tickets"
             accentColor="#0D9488"
-            onPress={() => Alert.alert('Help Desk', 'Bhai, internal ticketing window pipeline khulega.')}
+            onPress={() =>
+              router.push("/parent/contact-support")
+            }
           />
 
-          <MenuRowItem 
+          <MenuRowItem
             icon="settings"
             title="Settings"
             subtitle="App preferences, alerts configuration & language"
@@ -119,26 +200,183 @@ export default function ParentProfileScreen() {
         {/* SECURITY & DATA DOCK */}
         <Text style={styles.sectionLabelTitle}>Security & Privacy</Text>
         <View style={styles.cardWrapper}>
-          <MenuRowItem 
+          <MenuRowItem
             icon="lock"
             title="Change Passcode"
             subtitle="Update security login parameters"
             accentColor="#64748B"
-            onPress={() => {}}
+            onPress={() => { }}
           />
         </View>
 
         {/* ACCOUNT DEACTIVATION ACTION */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.logoutButtonCta}
           activeOpacity={0.8}
-          onPress={() => Alert.alert('Logout', 'Kya aap sach me app exit session clear karna chahte hain?')}
+          onPress={() => {
+
+            Alert.alert(
+              "Logout",
+              "Are you sure you want to logout?",
+              [
+                {
+                  text: "Cancel",
+                  style: "cancel"
+                },
+                {
+                  text: "Logout",
+                  onPress: async () => {
+
+                    await AsyncStorage.clear();
+
+                    router.replace("/login");
+
+                  }
+                }
+              ]
+            );
+
+          }}
         >
           <Feather name="log-out" size={16} color="#EF4444" style={{ marginRight: 8 }} />
           <Text style={styles.logoutCtaText}>Logout from Device</Text>
         </TouchableOpacity>
 
       </ScrollView>
+
+      <Modal
+        visible={profileModalVisible}
+        transparent
+        animationType="fade"
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.4)",
+            justifyContent: "center",
+            padding: 20
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "#FFF",
+              borderRadius: 20,
+              padding: 20
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "700",
+                marginBottom: 20
+              }}
+            >
+              Parent Information
+            </Text>
+
+            <Text>Name</Text>
+            <Text style={{ marginBottom: 12 }}>
+              {parentData?.fullName}
+            </Text>
+
+            <Text>Email</Text>
+            <Text style={{ marginBottom: 12 }}>
+              {parentData?.email}
+            </Text>
+
+            <Text>Phone</Text>
+            <Text style={{ marginBottom: 12 }}>
+              {parentData?.phone || "Not Available"}
+            </Text>
+
+            <TouchableOpacity
+              onPress={() =>
+                setProfileModalVisible(false)
+              }
+            >
+              <Text
+                style={{
+                  color: "#2563EB",
+                  fontWeight: "700"
+                }}
+              >
+                Close
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+
+      <Modal
+        visible={childrenModalVisible}
+        transparent
+        animationType="fade"
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.4)",
+            justifyContent: "center",
+            padding: 20
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "#FFF",
+              borderRadius: 20,
+              padding: 20
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "700",
+                marginBottom: 20
+              }}
+            >
+              Linked Children
+            </Text>
+
+            {linkedChildren.map((child: any) => (
+              <View
+                key={child.id}
+                style={{
+                  marginBottom: 12
+                }}
+              >
+                <Text
+                  style={{
+                    fontWeight: "600"
+                  }}
+                >
+                  {child.fullName}
+                </Text>
+
+                <Text>
+                  {child.class_name}
+                </Text>
+              </View>
+            ))}
+
+            <TouchableOpacity
+              onPress={() =>
+                setChildrenModalVisible(false)
+              }
+            >
+              <Text
+                style={{
+                  color: "#2563EB",
+                  fontWeight: "700"
+                }}
+              >
+                Close
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 }
@@ -155,10 +393,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center'
   },
   headerTitle: { fontSize: 16, fontWeight: '700', color: '#0F172A' },
-  
+
   // Canvas configuration
   scrollCanvas: { padding: 16, paddingBottom: 40 },
-  
+
   // Top Hero Profile Badge
   avatarHeroCard: {
     backgroundColor: '#FFFFFF', borderRadius: 20, padding: 20,
@@ -172,7 +410,7 @@ const styles = StyleSheet.create({
   // List Sections Base Settings
   sectionLabelTitle: { fontSize: 12, fontWeight: '700', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 0.5, paddingLeft: 4, marginBottom: 10 },
   cardWrapper: { backgroundColor: '#FFFFFF', borderRadius: 20, paddingHorizontal: 14, borderWidth: 1, borderColor: '#F1F5F9', marginBottom: 24 },
-  
+
   // Individual Rows Structural Setup
   menuRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#F8FAFC' },
   menuRowLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 0.85 },
@@ -181,7 +419,7 @@ const styles = StyleSheet.create({
   menuTitle: { fontSize: 13, fontWeight: '600', color: '#1E293B' },
   menuSubtitle: { fontSize: 11, color: '#94A3B8', marginTop: 2, lineHeight: 14 },
   menuRowRight: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  
+
   // Custom badges details
   verifiedBadge: { backgroundColor: '#E6F4EA', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 },
   verifiedText: { fontSize: 9, fontWeight: '700', color: '#137333', textTransform: 'uppercase' },

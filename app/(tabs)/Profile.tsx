@@ -335,7 +335,30 @@ export default function ProfileScreen() {
         {/* ================= SIGN OUT ACCOUNT ACTION ================= */}
         <TouchableOpacity
           style={styles.logoutActionRowButton}
-          onPress={handleLogout}
+          onPress={() => {
+
+ Alert.alert(
+  "Logout",
+  "Are you sure you want to logout?",
+  [
+   {
+    text: "Cancel",
+    style: "cancel"
+   },
+   {
+    text: "Logout",
+    onPress: async () => {
+
+      await AsyncStorage.clear();
+
+      router.replace("/login");
+
+    }
+   }
+  ]
+ );
+
+}}
         >
           <MaterialIcons name="logout" size={18} color="#EF4444" />
           <Text style={styles.logoutButtonText}>Sign Out Account</Text>

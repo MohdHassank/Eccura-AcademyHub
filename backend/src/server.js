@@ -1,9 +1,11 @@
 const express = require("express");
+const cors = require("cors");
 const { connectDB } = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 
 // 1. Express app ko initialize karna
 const app = express();
+app.use(cors());
 
 // 2. Middleware: Incoming JSON requests ko parse (read) karne ke liye
 app.use(express.json());
@@ -25,7 +27,10 @@ app.use("/api/student", studentRoutes);
 
 const parentRoutes = require("./routes/parentRoutes");
 
+const supportRoutes = require("./routes/supportRoutes");
+
 app.use("/api/parent", parentRoutes);
+app.use("/api/support", supportRoutes);
 
 // 6. Server ki port define karna aur listen karna
 const PORT = 5000;

@@ -355,10 +355,119 @@ const getFeesSummary = async (req, res) => {
   }
 };
 
+const getParentProfile = async (req, res) => {
+  try {
+
+    const { parentId } = req.params;
+
+    const result = await new sql.Request()
+      .input("ParentId", sql.Int, parentId)
+      .query(`
+        SELECT
+          id,
+          fullName,
+          email,
+          phone
+        FROM Students
+        WHERE id = @ParentId
+      `);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Parent not found"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      parent: result.recordset[0]
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
+
+const getParentNotifications = async (req, res) => {
+
+  try {
+
+    const { studentId } = req.params;
+
+    const notices = await new sql.Request()
+  .input("StudentId", sql.Int, studentId)
+  .query(`
+    SELECT
+      id,
+      title,
+      description,
+      createdAt
+    FROM Notices
+    WHERE studentId = @StudentId
+  `);
+
+const announcements = await new sql.Request()
+  .input("StudentId", sql.Int, studentId)
+  .query(`
+    SELECT
+      id,
+      title,
+      description,
+      createdAt
+    FROM Announcements
+    WHERE studentId = @StudentId
+  `);
+
+    const notifications = [
+
+      ...notices.recordset.map(item => ({
+        ...item,
+        type: "teacher",
+        isUnread: true
+      })),
+
+      ...announcements.recordset.map(item => ({
+        ...item,
+        type: "admin",
+        isUnread: true
+      }))
+
+    ];
+
+    notifications.sort(
+      (a, b) =>
+        new Date(b.createdAt) -
+        new Date(a.createdAt)
+    );
+
+    res.status(200).json({
+      success: true,
+      notifications
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+
+};
+
 module.exports = {
   getParentDashboard,
   getChildPerformance,
   getLinkedChildren
     , getAcademicTracking,
-  getFeesSummary
+  getFeesSummary,
+  getParentProfile,
+  getParentNotifications
 };

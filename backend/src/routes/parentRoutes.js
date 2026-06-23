@@ -7,6 +7,8 @@ const {
     , getLinkedChildren
     , getAcademicTracking
     , getFeesSummary
+    , getParentProfile
+    , getParentNotifications
 } = require("../controllers/parentController");
 
 router.get(
@@ -32,6 +34,16 @@ router.get(
 router.get(
   "/fees/:studentId",
   getFeesSummary
+);
+
+router.get(
+  "/profile/:parentId",
+  getParentProfile
+);
+
+router.get(
+  "/notifications/:studentId",
+  getParentNotifications
 );
 
 module.exports = router;

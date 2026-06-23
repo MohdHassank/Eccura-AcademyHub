@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -12,72 +12,90 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Notification Item Interface Type
 interface NotificationItem {
-  id: string;
-  type: 'attendance' | 'fee' | 'circular';
+  id: number;
   title: string;
   description: string;
-  time: string;
-  isUnread: boolean;
+  type: string;
+  createdAt: string;
 }
 
 export default function NotificationsScreen() {
   const router = useRouter();
 
   // Mock Data State for dynamic updates
-  const [notifications, setNotifications] = useState<NotificationItem[]>([
-    {
-      id: '1',
-      type: 'attendance',
-      title: 'Absence Alert: Hassan Khan',
-      description: 'Bhai, Hassan aaj morning lecture (09:15 AM) me absent mark kiya gaya h. Please leave application verify karein.',
-      time: '10 mins ago',
-      isUnread: true,
-    },
-    {
-      id: '2',
-      type: 'fee',
-      title: 'Quarter 2 Fee Receipt Generated',
-      description: 'Academic fee of ₹18,500 successfully clear ho chuki h. Aap dashboard se formal digital invoice download kar sakte hain.',
-      time: '2 hours ago',
-      isUnread: true,
-    },
-    {
-      id: '3',
-      type: 'circular',
-      title: 'Summer Vacation Circular 2026',
-      description: 'School admin desk se naya circular release hua h. Garmiyo ki chuttiyan 25th June se start ho rahi hain.',
-      time: 'Yesterday',
-      isUnread: false,
-    },
-    {
-      id: '4',
-      type: 'circular',
-      title: 'Parent-Teacher Meeting (PTM)',
-      description: 'Saturday ko morning 09:00 AM se final term report distribution audit card ke liye PTM schedule ki gayi h.',
-      time: '3 days ago',
-      isUnread: false,
-    },
-  ]);
+  const [notifications, setNotifications] =
+    useState<NotificationItem[]>([]);
 
   // Handler to clear all unread badges
-  const markAllAsRead = () => {
-    setNotifications(prev => prev.map(item => ({ ...item, isUnread: false })));
+  const markAllAsRead = () => { };
+  // Helper helper to dynamic styles maps
+  // const getTypeConfigs = (type: string) => {
+  //   switch (type) {
+  //     case 'attendance':
+  //       return { icon: 'calendar-alert', color: '#EF4444', bgColor: '#FEE2E2' };
+  //     case 'fee':
+  //       return { icon: 'cash-check', color: '#10B981', bgColor: '#E6F4EA' };
+  //     default:
+  //       return { icon: 'file-document-outline', color: '#6D28D9', bgColor: '#F3E8FF' };
+  //   }
+  // };
+
+ const getTypeConfigs = () => {
+
+    return {
+      icon: "file-document-outline",
+      color: "#6D28D9",
+      bgColor: "#F3E8FF"
+    };
+
   };
 
-  // Helper helper to dynamic styles maps
-  const getTypeConfigs = (type: string) => {
-    switch (type) {
-      case 'attendance':
-        return { icon: 'calendar-alert', color: '#EF4444', bgColor: '#FEE2E2' };
-      case 'fee':
-        return { icon: 'cash-check', color: '#10B981', bgColor: '#E6F4EA' };
-      default:
-        return { icon: 'file-document-outline', color: '#6D28D9', bgColor: '#F3E8FF' };
+
+  const fetchNotifications = async () => {
+
+    try {
+
+      const selectedChildId =
+        await AsyncStorage.getItem(
+          "selectedChildId"
+        );
+
+      const response =
+        await axios.get(
+          `http://192.168.29.49:5000/api/parent/notifications/${selectedChildId}`
+        );
+
+      if (response.data.success) {
+
+        setNotifications(
+          response.data.notifications
+        );
+
+      }
+
+    } catch (error) {
+
+      console.log(
+        "Notifications Error:",
+        error
+      );
+
     }
+
   };
+
+  useEffect(() => {
+
+    fetchNotifications();
+
+  }, []);
+
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -91,8 +109,8 @@ export default function NotificationsScreen() {
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Notifications</Text>
         </View>
-        
-        {notifications.some(n => n.isUnread) && (
+
+        {(notifications.length > 0) && (
           <TouchableOpacity onPress={markAllAsRead} activeOpacity={0.6}>
             <Text style={styles.markReadTextCta}>Mark all as read</Text>
           </TouchableOpacity>
@@ -109,11 +127,11 @@ export default function NotificationsScreen() {
           </View>
         ) : (
           notifications.map((item) => {
-            const config = getTypeConfigs(item.type);
+            const config = getTypeConfigs();
             return (
-              <TouchableOpacity 
-                key={item.id} 
-                style={[styles.notificationCard, item.isUnread && styles.unreadCardBg]}
+              <TouchableOpacity
+                key={item.id}
+                style={styles.notificationCard}
                 activeOpacity={0.8}
               >
                 {/* Left side Accent Icon Box */}
@@ -124,10 +142,15 @@ export default function NotificationsScreen() {
                 {/* Central Info Content Data */}
                 <View style={styles.contentBodyFrame}>
                   <View style={styles.topMetaRow}>
-                    <Text style={[styles.noticeTitleText, item.isUnread && styles.unreadTitleFont]} numberOfLines={1}>
+                    <Text
+                      style={styles.noticeTitleText}
+                    >
                       {item.title}
                     </Text>
-                    <Text style={styles.timeTickerText}>{item.time}</Text>
+                    <Text style={styles.timeTickerText}>
+                      {new Date(item.createdAt)
+                        .toLocaleDateString()}
+                    </Text>
                   </View>
                   <Text style={styles.descriptionText} numberOfLines={3}>
                     {item.description}
@@ -135,9 +158,7 @@ export default function NotificationsScreen() {
                 </View>
 
                 {/* Right edge Blue dot tracker */}
-                {item.isUnread && (
-                  <View style={styles.unreadPulseDot} />
-                )}
+
               </TouchableOpacity>
             );
           })
@@ -161,7 +182,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontSize: 16, fontWeight: '700', color: '#0F172A' },
   markReadTextCta: { fontSize: 12, fontWeight: '600', color: '#6D28D9', paddingRight: 4 },
-  
+
   // Canvas configuration
   scrollCanvas: { padding: 16, paddingBottom: 40 },
 
@@ -179,7 +200,7 @@ const styles = StyleSheet.create({
   unreadTitleFont: { color: '#0F172A', fontWeight: '700' },
   timeTickerText: { fontSize: 10, color: '#94A3B8', fontWeight: '500' },
   descriptionText: { fontSize: 12, color: '#64748B', lineHeight: 18, fontWeight: '400' },
-  
+
   // Unread Blue Dot Indicator Setup
   unreadPulseDot: { width: 7, height: 7, borderRadius: 3.5, backgroundColor: '#3B82F6', position: 'absolute', right: 14, bottom: 14 },
 
