@@ -32,19 +32,19 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 export default function HomePage() {
   const router = useRouter();
   useFocusEffect(
-  useCallback(() => {
-    const onBackPress = () => {
-      return true;
-    };
+    useCallback(() => {
+      const onBackPress = () => {
+        return true;
+      };
 
-    const subscription = BackHandler.addEventListener(
-      "hardwareBackPress",
-      onBackPress
-    );
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
 
-    return () => subscription.remove();
-  }, [])
-);
+      return () => subscription.remove();
+    }, [])
+  );
   // Active states for original home sections
   const [activeTestTab, setActiveTestTab] = useState("Upcoming");
   const [user, setUser] = useState<any>(null);
@@ -149,7 +149,7 @@ export default function HomePage() {
     fetchNotifications();
   }, []);
 
-  
+
 
   const loadDashboard = async () => {
     try {

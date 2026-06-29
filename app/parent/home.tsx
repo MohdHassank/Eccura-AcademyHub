@@ -18,6 +18,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons, Feather, MaterialCommunityIcons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
+import notifications from './notifications';
 
 const { width } = Dimensions.get('window');
 
@@ -37,6 +38,7 @@ export default function ParentDashboardScreen() {
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [parentName, setParentName] = useState("");
+  const [notificationCount, setNotificationCount] = useState(0);
 
   const fetchParentDashboard = async () => {
     try {
@@ -67,9 +69,9 @@ export default function ParentDashboardScreen() {
     }
   };
 
-  useEffect(() => {
-    fetchParentDashboard();
-  }, []);
+  // useEffect(() => {
+  //   fetchParentDashboard();
+  // }, []);
   const getSubjectIcon = (subject: string) => {
     switch (subject.toLowerCase()) {
 
@@ -93,6 +95,31 @@ export default function ParentDashboardScreen() {
     }
   };
 
+  const fetchNotificationCount = async () => {
+  try {
+
+    const selectedChildId =
+      await AsyncStorage.getItem("selectedChildId");
+
+    const response = await axios.get(
+      `http://192.168.29.49:5000/api/parent/notifications/${selectedChildId}`
+    );
+
+    if (response.data.success) {
+      setNotificationCount(
+        response.data.notifications.length
+      );
+    }
+
+  } catch (error) {
+    console.log("Notification Count Error:", error);
+  }
+};
+
+useEffect(() => {
+  fetchParentDashboard();
+  fetchNotificationCount();
+}, []);
 
   if (loading) {
     return (
@@ -107,31 +134,33 @@ export default function ParentDashboardScreen() {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       {/* 1. BRAND NAVIGATION HEADER */}
-      <View style={styles.topHeaderNavbar}>
-        {/* Balanced left spacer for proper alignment */}
-        <View style={styles.headerSpacerPlaceholder} />
+      <View style={styles.topAppBar}>
+        {/* <TouchableOpacity
+          style={styles.menuIconButton}
+          onPress={() => setShowMenu(true)}
+        >
+          <Feather name="menu" size={24} color="#1E293B" />
+        </TouchableOpacity> */}
 
-        <View style={styles.brandGroupCentered}>
+        <View style={styles.brandContainer}>
           <Image
-            source={require('../../assets/images/logo.png')}
-            defaultSource={require('../../assets/images/logo.png')}
-            style={styles.brandLogoImageEnhancedOnly}
-            resizeMode="contain"
+            source={require("../../assets/images/logo.png")}
+            style={styles.brandLogo}
           />
         </View>
 
-        <View style={styles.headerActionGroupRight}>
-          <TouchableOpacity
-            style={styles.bellIconTouch}
-            activeOpacity={0.7}
-            onPress={() => router.push('/parent/notifications')}
-          >
-            <Feather name="bell" size={24} color="#55688a" />
-            <View style={styles.notificationBadgeCount}>
-              <Text style={styles.badgeTextNumber}>3</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={styles.bellIconButton}
+          onPress={() => router.push('/parent/notifications')}
+        >
+          <Feather name="bell" size={22} color="#1E293B" />
+
+          <View style={styles.badgeIndicator}>
+            <Text style={styles.badgeText}>
+              {notificationCount}
+            </Text>
+          </View>
+        </TouchableOpacity>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollCanvasContainer}>
@@ -335,7 +364,7 @@ export default function ParentDashboardScreen() {
           <View style={{ position: 'relative' }}>
             <Ionicons name="notifications-outline" size={20} color="#718096" />
             <View style={styles.bottomTabAlertBadgeCountIndicatorDot}>
-              <Text style={styles.bottomTabBadgeTextContentMini}>3</Text>
+              <Text style={styles.bottomTabBadgeTextContentMini}>{notificationCount}</Text>
             </View>
           </View>
           <Text style={styles.tabItemLabelInlineTextText}>Notifications</Text>
@@ -535,6 +564,74 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: "#334155",
+  },
+
+  topAppBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    // 🔥 StatusBar ke niche space badhane ke liye padding-top aur height ko adjust kiya
+    paddingTop: 4,
+    height: Platform.OS === "android" ? 75 : 70, // Status bar ki height ko mila kar perfect size
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderColor: "#F1F5F9",
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.02,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  menuIconButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: "#F8FAFC",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+  brandContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    height: "100%",
+  },
+  brandLogo: {
+    width: 265,
+    height: 115,
+    resizeMode: "contain",
+  },
+  bellIconButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: "#F8FAFC",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+
+  badgeIndicator: {
+    position: "absolute",
+    top: -2,
+    right: -2,
+    backgroundColor: "#EF4444",
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1.5,
+    borderColor: "#FFFFFF",
+  },
+  badgeText: {
+    color: "#FFFFFF",
+    fontSize: 9,
+    fontWeight: "800",
   },
 
   subjectTitle: {

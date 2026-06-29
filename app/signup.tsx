@@ -216,6 +216,7 @@ export default function SignUpPage() {
                   value={studentEmail}
                   onChangeText={setStudentEmail}
                   style={styles.input}
+                  
                   keyboardType="email-address"
                   autoCapitalize="none"
                 />

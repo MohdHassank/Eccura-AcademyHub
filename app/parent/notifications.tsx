@@ -1,19 +1,17 @@
+import { Feather, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
+  ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
-  View,
-  StatusBar,
-  ScrollView,
   TouchableOpacity,
-  Dimensions,
-  Platform
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Notification Item Interface Type
 interface NotificationItem {
@@ -45,7 +43,7 @@ export default function NotificationsScreen() {
   //   }
   // };
 
- const getTypeConfigs = () => {
+  const getTypeConfigs = () => {
 
     return {
       icon: "file-document-outline",
